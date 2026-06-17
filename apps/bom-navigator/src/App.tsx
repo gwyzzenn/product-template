@@ -689,38 +689,213 @@ function TraceabilityTab() {
   )
 }
 
-// ── Rule Settings Tab ──
-const RULES = [
-  { label: 'Auto-assign on submission', desc: 'Automatically assign an engineer when a part entry is submitted for approval.', defaultOn: true },
-  { label: 'Validate on configuration change', desc: 'Run airworthiness validation rules automatically when part configuration changes.', defaultOn: true },
-  { label: 'Block release on missing config', desc: 'Prevent airworthiness release when required part fields are incomplete.', defaultOn: false },
-  { label: 'Notify on analysis conflict', desc: 'Send notification when a parts analysis job detects rule conflicts.', defaultOn: true },
-  { label: 'Enforce ATA chapter compliance', desc: 'Apply ATA chapter-specific compatibility rules across all active part evaluations.', defaultOn: true },
-] as const
+// ── Rule Settings Tab — split-pane table + inline edit panel ──
+type RuleRecord = {
+  id: string
+  partNumber: string
+  ataChapter: string
+  level: string
+  configBy: string
+  configType: string
+  specItem: string
+  specValue: string
+  lastModified: string
+}
+
+const RULE_RECORDS: RuleRecord[] = [
+  { id: '1', partNumber: '53-11-00-001', ataChapter: 'ATA53', level: 'L1', configBy: 'JAKE-T', configType: 'LSI', specItem: 'FWD-SECT', specValue: 'REV.C-APPROVED, AMS4173, OEM-REF-A321-53-10', lastModified: '2026-06-10 at 09:32' },
+  { id: '2', partNumber: '57-10-00-001', ataChapter: 'ATA57', level: 'L1', configBy: 'SARAH-L', configType: 'LSI', specItem: 'WB-CTR', specValue: 'REV.B-REVIEW, AMS4050, OEM-REF-A321-57-10', lastModified: '2026-06-08 at 14:15' },
+  { id: '3', partNumber: '32-10-11-001', ataChapter: 'ATA32', level: 'L2', configBy: 'MIKE-C', configType: 'MLG', specItem: 'MLG-LH', specValue: 'REV.D-APPROVED, AMS6415, OEM-REF-A321-32-11', lastModified: '2026-06-01 at 16:48' },
+  { id: '4', partNumber: '32-10-12-001', ataChapter: 'ATA32', level: 'L2', configBy: 'SARAH-L', configType: 'MLG', specItem: 'MLG-RH', specValue: 'REV.D-APPROVED, AMS6415, OEM-REF-A321-32-12', lastModified: '2026-06-01 at 16:48' },
+  { id: '5', partNumber: '27-10-00-001', ataChapter: 'ATA27', level: 'L1', configBy: 'JAKE-T', configType: 'AIL', specItem: 'AIL-LH', specValue: 'REV.B-PENDING, AMS4143, OEM-REF-A321-27-10', lastModified: '2026-06-05 at 11:20' },
+]
 
 function RuleSettingsTab() {
+  const [selected, setSelected] = useState<RuleRecord | null>(null)
+  const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set())
+  const [ataFilter, setAtaFilter] = useState('')
+  const [pnFilter, setPnFilter] = useState('')
+  const [typeFilter, setTypeFilter] = useState('')
+
+  const filtered = RULE_RECORDS.filter((r) =>
+    (!ataFilter || r.ataChapter.toLowerCase().includes(ataFilter.toLowerCase())) &&
+    (!pnFilter || r.partNumber.includes(pnFilter)) &&
+    (!typeFilter || r.configType.toLowerCase().includes(typeFilter.toLowerCase()))
+  )
+
+  const toggleCheck = (id: string) =>
+    setCheckedIds((prev) => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s })
+
+  const allChecked = filtered.length > 0 && filtered.every((r) => checkedIds.has(r.id))
+  const toggleAll = () =>
+    setCheckedIds(allChecked ? new Set() : new Set(filtered.map((r) => r.id)))
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-body-lg font-semibold">Rule Settings</h2>
-        <Button variant="primary" size="sm" onClick={() => toast({ title: 'Rule settings saved', variant: 'success' })}>
-          Save Changes
-        </Button>
-      </div>
-      <div className="flex flex-col gap-2">
-        {RULES.map((rule) => (
-          <div key={rule.label} className="flex items-center gap-4 px-4 py-3 rounded-lg border border-divider bg-surface">
-            <div className="flex-1">
-              <div className="text-body font-medium">{rule.label}</div>
-              <div className="text-caption text-fg-secondary mt-0.5">{rule.desc}</div>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
-              <input type="checkbox" defaultChecked={rule.defaultOn} className="sr-only peer" />
-              <div className="w-9 h-5 bg-surface-secondary rounded-full peer peer-checked:bg-primary transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-surface after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4 after:shadow-sm" />
-            </label>
+    <div className="flex min-h-[520px] border border-divider rounded-lg overflow-hidden">
+      {/* ── Main table ── */}
+      <div className="flex-1 min-w-0 flex flex-col">
+        {/* Filter bar */}
+        <div className="flex items-end gap-3 px-4 py-3 border-b border-divider bg-surface-secondary">
+          <div className="flex flex-col gap-1 flex-1">
+            <label className="text-caption text-fg-secondary font-medium">ATA Chapter</label>
+            <input
+              value={ataFilter}
+              onChange={(e) => setAtaFilter(e.target.value)}
+              placeholder="e.g. ATA32"
+              className="h-8 px-2.5 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary text-sm"
+            />
           </div>
-        ))}
+          <div className="flex flex-col gap-1 flex-1">
+            <label className="text-caption text-fg-secondary font-medium">Part Number</label>
+            <input
+              value={pnFilter}
+              onChange={(e) => setPnFilter(e.target.value)}
+              placeholder="e.g. 32-10-11"
+              className="h-8 px-2.5 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary text-sm"
+            />
+          </div>
+          <div className="flex flex-col gap-1 flex-1">
+            <label className="text-caption text-fg-secondary font-medium">Config Type</label>
+            <input
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              placeholder="e.g. LSI"
+              className="h-8 px-2.5 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary text-sm"
+            />
+          </div>
+          <button
+            onClick={() => { setAtaFilter(''); setPnFilter(''); setTypeFilter('') }}
+            className="h-8 px-3 rounded-md bg-primary text-surface text-body font-medium hover:bg-primary/90 transition-colors shrink-0"
+          >
+            Search
+          </button>
+        </div>
+
+        {/* Table */}
+        <div className="flex-1 overflow-auto">
+          <table className="w-full text-body border-collapse">
+            <thead>
+              <tr className="bg-surface-secondary border-b border-divider sticky top-0">
+                <th className="w-10 px-3 py-3 text-left">
+                  <input type="checkbox" checked={allChecked} onChange={toggleAll}
+                    className="w-4 h-4 rounded border-divider accent-primary cursor-pointer" />
+                </th>
+                {['Part Number', 'ATA Chapter', 'Level', 'Config By', 'Config Type', 'Spec Item', 'Spec Value', 'Last Modified', ''].map((h) => (
+                  <th key={h} className="px-3 py-3 text-left text-caption text-fg-secondary font-medium whitespace-nowrap">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((row) => (
+                <tr
+                  key={row.id}
+                  className={`border-b border-divider hover:bg-surface-hover cursor-default ${selected?.id === row.id ? 'bg-primary/5' : ''}`}
+                >
+                  <td className="w-10 px-3 py-3">
+                    <input type="checkbox" checked={checkedIds.has(row.id)} onChange={() => toggleCheck(row.id)}
+                      className="w-4 h-4 rounded border-divider accent-primary cursor-pointer" />
+                  </td>
+                  <td className="px-3 py-3 font-mono text-caption font-semibold whitespace-nowrap">{row.partNumber}</td>
+                  <td className="px-3 py-3 text-fg-secondary">{row.ataChapter}</td>
+                  <td className="px-3 py-3 text-fg-secondary">{row.level}</td>
+                  <td className="px-3 py-3 text-fg-secondary font-mono text-caption">{row.configBy}</td>
+                  <td className="px-3 py-3 text-fg-secondary">{row.configType}</td>
+                  <td className="px-3 py-3 font-mono text-caption">{row.specItem}</td>
+                  <td className="px-3 py-3 text-fg-secondary text-caption max-w-[220px] truncate">{row.specValue}</td>
+                  <td className="px-3 py-3 text-fg-secondary text-caption whitespace-nowrap">{row.lastModified}</td>
+                  <td className="px-3 py-3">
+                    <button
+                      onClick={() => setSelected(selected?.id === row.id ? null : row)}
+                      className={`p-1.5 rounded-md hover:bg-surface-hover text-fg-tertiary hover:text-fg-secondary transition-colors ${selected?.id === row.id ? 'text-primary' : ''}`}
+                      title="View details"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.4"/>
+                        <path d="M8 7v5M8 5.5v.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={10} className="px-4 py-12 text-center text-fg-tertiary text-body">
+                    No rule records match the current filter.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-between px-4 py-2.5 border-t border-divider bg-surface-secondary">
+          <span className="text-caption text-fg-secondary">1 – {filtered.length} of {RULE_RECORDS.length}</span>
+          <div className="flex items-center gap-1">
+            {[1, 2, 3].map((p) => (
+              <button key={p} className={`w-7 h-7 rounded text-caption font-medium transition-colors ${p === 1 ? 'bg-primary text-surface' : 'hover:bg-surface-hover text-fg-secondary'}`}>{p}</button>
+            ))}
+            <button className="w-7 h-7 rounded hover:bg-surface-hover text-fg-secondary">‹</button>
+            <button className="w-7 h-7 rounded hover:bg-surface-hover text-fg-secondary">›</button>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-caption text-fg-secondary">Items per Page</span>
+            <select className="h-7 px-2 rounded-md border border-divider bg-surface text-caption outline-none">
+              <option>20</option><option>50</option><option>100</option>
+            </select>
+          </div>
+        </div>
       </div>
+
+      {/* ── Right edit panel ── */}
+      {selected && (
+        <div className="w-[360px] shrink-0 border-l border-divider flex flex-col bg-surface">
+          {/* Panel header */}
+          <div className="flex items-start justify-between px-4 py-4 border-b border-divider">
+            <div>
+              <div className="text-caption text-fg-secondary">Part Number</div>
+              <div className="text-body-lg font-semibold font-mono mt-0.5">{selected.partNumber}</div>
+            </div>
+            <button onClick={() => setSelected(null)} className="p-1 rounded hover:bg-surface-hover text-fg-tertiary mt-0.5">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+            </button>
+          </div>
+
+          {/* Form fields */}
+          <div className="flex-1 overflow-auto px-4 py-4 flex flex-col gap-4">
+            {[
+              { label: '*ATA Chapter', options: ['ATA21 — Air Conditioning', 'ATA27 — Flight Controls', 'ATA32 — Landing Gear', 'ATA49 — APU', 'ATA53 — Fuselage', 'ATA57 — Wings'], value: selected.ataChapter },
+              { label: '*Level', options: ['L1', 'L2', 'L3'], value: selected.level },
+              { label: '*Config By', options: ['JAKE-T', 'SARAH-L', 'MIKE-C', 'SYSTEM'], value: selected.configBy },
+              { label: '*Config Type', options: ['LSI', 'MLG', 'AIL', 'APU', 'ACM'], value: selected.configType },
+              { label: '*Spec Item', options: ['FWD-SECT', 'WB-CTR', 'MLG-LH', 'MLG-RH', 'AIL-LH', 'AIL-RH'], value: selected.specItem },
+              { label: '*Spec Value', options: ['REV.A-APPROVED', 'REV.B-REVIEW', 'REV.B-PENDING', 'REV.C-APPROVED', 'REV.D-APPROVED'], value: selected.specValue.split(',')[0] },
+            ].map(({ label, options, value }) => (
+              <div key={label} className="flex flex-col gap-1">
+                <label className="text-caption text-fg-secondary font-medium">{label}</label>
+                <select defaultValue={value} className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary appearance-none">
+                  {options.map((o) => <option key={o}>{o}</option>)}
+                </select>
+              </div>
+            ))}
+
+            <button
+              onClick={() => toast({ title: `Rule record ${selected.partNumber} deleted`, variant: 'error' })}
+              className="text-left text-destructive text-body font-medium hover:underline mt-1"
+            >
+              Delete
+            </button>
+          </div>
+
+          {/* Footer */}
+          <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-divider">
+            <Button variant="secondary" onClick={() => setSelected(null)}>Discard</Button>
+            <Button variant="primary" onClick={() => toast({ title: `Rule config for ${selected.partNumber} submitted`, variant: 'success' })}>
+              Submit Change
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
