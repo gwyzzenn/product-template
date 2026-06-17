@@ -723,179 +723,188 @@ function RuleSettingsTab() {
     (!typeFilter || r.configType.toLowerCase().includes(typeFilter.toLowerCase()))
   )
 
-  const toggleCheck = (id: string) =>
-    setCheckedIds((prev) => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s })
-
   const allChecked = filtered.length > 0 && filtered.every((r) => checkedIds.has(r.id))
   const toggleAll = () =>
     setCheckedIds(allChecked ? new Set() : new Set(filtered.map((r) => r.id)))
+  const toggleCheck = (id: string) =>
+    setCheckedIds((prev) => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s })
+
+  const FORM_FIELDS: { label: string; options: string[]; value: string }[] = selected ? [
+    { label: '*ATA Chapter', options: ['ATA21 — Air Conditioning', 'ATA27 — Flight Controls', 'ATA32 — Landing Gear', 'ATA49 — APU', 'ATA53 — Fuselage', 'ATA57 — Wings'], value: selected.ataChapter },
+    { label: '*Level', options: ['L1', 'L2', 'L3'], value: selected.level },
+    { label: '*Config By', options: ['JAKE-T', 'SARAH-L', 'MIKE-C', 'SYSTEM'], value: selected.configBy },
+    { label: '*Config Type', options: ['LSI', 'MLG', 'AIL', 'APU', 'ACM'], value: selected.configType },
+    { label: '*Spec Item', options: ['FWD-SECT', 'WB-CTR', 'MLG-LH', 'MLG-RH', 'AIL-LH', 'AIL-RH'], value: selected.specItem },
+    { label: '*Spec Value', options: ['REV.A-APPROVED', 'REV.B-REVIEW', 'REV.B-PENDING', 'REV.C-APPROVED', 'REV.D-APPROVED'], value: selected.specValue.split(',')[0] },
+  ] : []
 
   return (
-    <div className="flex min-h-[520px] border border-divider rounded-lg overflow-hidden">
-      {/* ── Main table ── */}
-      <div className="flex-1 min-w-0 flex flex-col">
-        {/* Filter bar */}
-        <div className="flex items-end gap-3 px-4 py-3 border-b border-divider bg-surface-secondary">
-          <div className="flex flex-col gap-1 flex-1">
-            <label className="text-caption text-fg-secondary font-medium">ATA Chapter</label>
-            <input
-              value={ataFilter}
-              onChange={(e) => setAtaFilter(e.target.value)}
-              placeholder="e.g. ATA32"
-              className="h-8 px-2.5 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary text-sm"
-            />
-          </div>
-          <div className="flex flex-col gap-1 flex-1">
-            <label className="text-caption text-fg-secondary font-medium">Part Number</label>
-            <input
-              value={pnFilter}
-              onChange={(e) => setPnFilter(e.target.value)}
-              placeholder="e.g. 32-10-11"
-              className="h-8 px-2.5 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary text-sm"
-            />
-          </div>
-          <div className="flex flex-col gap-1 flex-1">
-            <label className="text-caption text-fg-secondary font-medium">Config Type</label>
-            <input
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              placeholder="e.g. LSI"
-              className="h-8 px-2.5 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary text-sm"
-            />
-          </div>
-          <button
-            onClick={() => { setAtaFilter(''); setPnFilter(''); setTypeFilter('') }}
-            className="h-8 px-3 rounded-md bg-primary text-surface text-body font-medium hover:bg-primary/90 transition-colors shrink-0"
-          >
-            Search
-          </button>
-        </div>
+    // fill height: calc from approximate chrome+breadcrumb+tabs = ~260px; min 500px
+    <div className="flex flex-col" style={{ height: 'calc(100svh - 260px)', minHeight: '500px' }}>
 
-        {/* Table */}
-        <div className="flex-1 overflow-auto">
-          <table className="w-full text-body border-collapse">
-            <thead>
-              <tr className="bg-surface-secondary border-b border-divider sticky top-0">
-                <th className="w-10 px-3 py-3 text-left">
-                  <input type="checkbox" checked={allChecked} onChange={toggleAll}
-                    className="w-4 h-4 rounded border-divider accent-primary cursor-pointer" />
-                </th>
-                {['Part Number', 'ATA Chapter', 'Level', 'Config By', 'Config Type', 'Spec Item', 'Spec Value', 'Last Modified', ''].map((h) => (
-                  <th key={h} className="px-3 py-3 text-left text-caption text-fg-secondary font-medium whitespace-nowrap">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((row) => (
-                <tr
-                  key={row.id}
-                  className={`border-b border-divider hover:bg-surface-hover cursor-default ${selected?.id === row.id ? 'bg-primary/5' : ''}`}
-                >
-                  <td className="w-10 px-3 py-3">
-                    <input type="checkbox" checked={checkedIds.has(row.id)} onChange={() => toggleCheck(row.id)}
-                      className="w-4 h-4 rounded border-divider accent-primary cursor-pointer" />
-                  </td>
-                  <td className="px-3 py-3 font-mono text-caption font-semibold whitespace-nowrap">{row.partNumber}</td>
-                  <td className="px-3 py-3 text-fg-secondary">{row.ataChapter}</td>
-                  <td className="px-3 py-3 text-fg-secondary">{row.level}</td>
-                  <td className="px-3 py-3 text-fg-secondary font-mono text-caption">{row.configBy}</td>
-                  <td className="px-3 py-3 text-fg-secondary">{row.configType}</td>
-                  <td className="px-3 py-3 font-mono text-caption">{row.specItem}</td>
-                  <td className="px-3 py-3 text-fg-secondary text-caption max-w-[220px] truncate">{row.specValue}</td>
-                  <td className="px-3 py-3 text-fg-secondary text-caption whitespace-nowrap">{row.lastModified}</td>
-                  <td className="px-3 py-3">
-                    <button
-                      onClick={() => setSelected(selected?.id === row.id ? null : row)}
-                      className={`p-1.5 rounded-md hover:bg-surface-hover text-fg-tertiary hover:text-fg-secondary transition-colors ${selected?.id === row.id ? 'text-primary' : ''}`}
-                      title="View details"
-                    >
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.4"/>
-                        <path d="M8 7v5M8 5.5v.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-                      </svg>
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={10} className="px-4 py-12 text-center text-fg-tertiary text-body">
-                    No rule records match the current filter.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="flex items-center justify-between px-4 py-2.5 border-t border-divider bg-surface-secondary">
-          <span className="text-caption text-fg-secondary">1 – {filtered.length} of {RULE_RECORDS.length}</span>
-          <div className="flex items-center gap-1">
-            {[1, 2, 3].map((p) => (
-              <button key={p} className={`w-7 h-7 rounded text-caption font-medium transition-colors ${p === 1 ? 'bg-primary text-surface' : 'hover:bg-surface-hover text-fg-secondary'}`}>{p}</button>
-            ))}
-            <button className="w-7 h-7 rounded hover:bg-surface-hover text-fg-secondary">‹</button>
-            <button className="w-7 h-7 rounded hover:bg-surface-hover text-fg-secondary">›</button>
+      {/* ── Filter bar ── */}
+      <div className="flex items-end gap-3 px-4 py-3 border border-divider border-b-0 bg-surface-secondary rounded-t-lg">
+        {[
+          { label: 'ATA Chapter', value: ataFilter, onChange: setAtaFilter, placeholder: 'e.g. ATA32' },
+          { label: 'Part Number', value: pnFilter, onChange: setPnFilter, placeholder: 'e.g. 32-10-11' },
+          { label: 'Config Type', value: typeFilter, onChange: setTypeFilter, placeholder: 'e.g. LSI' },
+        ].map(({ label, value, onChange, placeholder }) => (
+          <div key={label} className="flex flex-col gap-1 flex-1">
+            <label className="text-caption text-fg-secondary font-medium">{label}</label>
+            <input
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder={placeholder}
+              className="h-8 px-2.5 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary text-sm"
+            />
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-caption text-fg-secondary">Items per Page</span>
-            <select className="h-7 px-2 rounded-md border border-divider bg-surface text-caption outline-none">
-              <option>20</option><option>50</option><option>100</option>
-            </select>
-          </div>
-        </div>
+        ))}
+        <button
+          onClick={() => { setAtaFilter(''); setPnFilter(''); setTypeFilter('') }}
+          className="h-8 px-4 rounded-md bg-primary text-surface text-body font-medium hover:bg-primary/90 transition-colors shrink-0"
+        >
+          Search
+        </button>
       </div>
 
-      {/* ── Right edit panel ── */}
-      {selected && (
-        <div className="w-[360px] shrink-0 border-l border-divider flex flex-col bg-surface">
-          {/* Panel header */}
-          <div className="flex items-start justify-between px-4 py-4 border-b border-divider">
-            <div>
-              <div className="text-caption text-fg-secondary">Part Number</div>
-              <div className="text-body-lg font-semibold font-mono mt-0.5">{selected.partNumber}</div>
+      {/* ── Main split: table + right panel (flex-1 fills remaining height) ── */}
+      <div className="flex flex-1 min-h-0 border border-divider">
+
+        {/* ── Table column ── */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Table scrollable body */}
+          <div className="flex-1 overflow-y-auto overflow-x-auto">
+            <table className="w-full text-body border-collapse">
+              <thead>
+                <tr className="bg-surface-secondary border-b border-divider sticky top-0 z-10">
+                  <th className="w-10 px-3 py-3 text-left">
+                    <input type="checkbox" checked={allChecked} onChange={toggleAll}
+                      className="w-4 h-4 rounded border-divider accent-primary cursor-pointer" />
+                  </th>
+                  {['Part Number', 'ATA', 'Level', 'Config By', 'Type', 'Spec Item', 'Spec Value', 'Last Modified', ''].map((h) => (
+                    <th key={h} className="px-3 py-3 text-left text-caption text-fg-secondary font-medium whitespace-nowrap">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((row) => (
+                  <tr
+                    key={row.id}
+                    className={`border-b border-divider hover:bg-surface-hover ${selected?.id === row.id ? 'bg-primary/5' : ''}`}
+                  >
+                    <td className="w-10 px-3 py-3">
+                      <input type="checkbox" checked={checkedIds.has(row.id)} onChange={() => toggleCheck(row.id)}
+                        className="w-4 h-4 rounded border-divider accent-primary cursor-pointer" />
+                    </td>
+                    <td className="px-3 py-3 font-mono text-caption font-semibold whitespace-nowrap">{row.partNumber}</td>
+                    <td className="px-3 py-3 text-fg-secondary whitespace-nowrap">{row.ataChapter}</td>
+                    <td className="px-3 py-3 text-fg-secondary">{row.level}</td>
+                    <td className="px-3 py-3 font-mono text-caption text-fg-secondary">{row.configBy}</td>
+                    <td className="px-3 py-3 text-fg-secondary">{row.configType}</td>
+                    <td className="px-3 py-3 font-mono text-caption">{row.specItem}</td>
+                    <td className="px-3 py-3 text-fg-secondary text-caption max-w-[200px] truncate">{row.specValue}</td>
+                    <td className="px-3 py-3 text-fg-secondary text-caption whitespace-nowrap">{row.lastModified}</td>
+                    <td className="px-3 py-3">
+                      <button
+                        onClick={() => setSelected(selected?.id === row.id ? null : row)}
+                        className={`p-1.5 rounded-md hover:bg-surface-hover transition-colors ${selected?.id === row.id ? 'text-primary' : 'text-fg-tertiary hover:text-fg-secondary'}`}
+                        title="View / edit"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                          <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.4"/>
+                          <path d="M8 7v5M8 5.5v.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {filtered.length === 0 && (
+                  <tr>
+                    <td colSpan={10} className="px-4 py-16 text-center text-fg-tertiary text-body">
+                      No rule records match the current filter.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination — pinned at bottom of table column, full width, no side padding on divider */}
+          <div className="flex items-center justify-between px-4 py-2 border-t border-divider bg-surface shrink-0">
+            <span className="text-caption text-fg-secondary">1 – {filtered.length} of {RULE_RECORDS.length}</span>
+            <div className="flex items-center gap-1">
+              {[1, 2, 3].map((p) => (
+                <button key={p} className={`w-7 h-7 rounded text-caption font-medium transition-colors ${p === 1 ? 'bg-primary text-surface' : 'hover:bg-surface-hover text-fg-secondary'}`}>{p}</button>
+              ))}
+              <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-hover text-fg-secondary">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7.5 9L4.5 6l3-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
+              </button>
+              <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-hover text-fg-secondary">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 3L7.5 6l-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
+              </button>
             </div>
-            <button onClick={() => setSelected(null)} className="p-1 rounded hover:bg-surface-hover text-fg-tertiary mt-0.5">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
-            </button>
-          </div>
-
-          {/* Form fields */}
-          <div className="flex-1 overflow-auto px-4 py-4 flex flex-col gap-4">
-            {[
-              { label: '*ATA Chapter', options: ['ATA21 — Air Conditioning', 'ATA27 — Flight Controls', 'ATA32 — Landing Gear', 'ATA49 — APU', 'ATA53 — Fuselage', 'ATA57 — Wings'], value: selected.ataChapter },
-              { label: '*Level', options: ['L1', 'L2', 'L3'], value: selected.level },
-              { label: '*Config By', options: ['JAKE-T', 'SARAH-L', 'MIKE-C', 'SYSTEM'], value: selected.configBy },
-              { label: '*Config Type', options: ['LSI', 'MLG', 'AIL', 'APU', 'ACM'], value: selected.configType },
-              { label: '*Spec Item', options: ['FWD-SECT', 'WB-CTR', 'MLG-LH', 'MLG-RH', 'AIL-LH', 'AIL-RH'], value: selected.specItem },
-              { label: '*Spec Value', options: ['REV.A-APPROVED', 'REV.B-REVIEW', 'REV.B-PENDING', 'REV.C-APPROVED', 'REV.D-APPROVED'], value: selected.specValue.split(',')[0] },
-            ].map(({ label, options, value }) => (
-              <div key={label} className="flex flex-col gap-1">
-                <label className="text-caption text-fg-secondary font-medium">{label}</label>
-                <select defaultValue={value} className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary appearance-none">
-                  {options.map((o) => <option key={o}>{o}</option>)}
-                </select>
-              </div>
-            ))}
-
-            <button
-              onClick={() => toast({ title: `Rule record ${selected.partNumber} deleted`, variant: 'error' })}
-              className="text-left text-destructive text-body font-medium hover:underline mt-1"
-            >
-              Delete
-            </button>
-          </div>
-
-          {/* Footer */}
-          <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-divider">
-            <Button variant="secondary" onClick={() => setSelected(null)}>Discard</Button>
-            <Button variant="primary" onClick={() => toast({ title: `Rule config for ${selected.partNumber} submitted`, variant: 'success' })}>
-              Submit Change
-            </Button>
+            <div className="flex items-center gap-2">
+              <span className="text-caption text-fg-secondary">Items per Page</span>
+              <select className="h-7 px-2 rounded-md border border-divider bg-surface text-caption outline-none">
+                <option>20</option><option>50</option><option>100</option>
+              </select>
+            </div>
           </div>
         </div>
-      )}
+
+        {/* ── Right edit panel (flush, no border-radius) ── */}
+        {selected && (
+          <div className="w-[360px] shrink-0 border-l border-divider flex flex-col bg-surface">
+            {/* Panel header — bottom divider flush edge-to-edge */}
+            <div className="px-4 py-4 border-b border-divider shrink-0 flex items-start justify-between">
+              <div>
+                <div className="text-caption text-fg-secondary">Part Number</div>
+                <div className="text-body-lg font-semibold font-mono mt-0.5">{selected.partNumber}</div>
+              </div>
+              <button onClick={() => setSelected(null)} className="p-1 rounded hover:bg-surface-hover text-fg-tertiary">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              </button>
+            </div>
+
+            {/* Form body — scrollable; dividers between fields use -mx-4 to be flush */}
+            <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col">
+              {FORM_FIELDS.map(({ label, options, value }, idx) => (
+                <div key={label}>
+                  <div className="py-3 flex flex-col gap-1">
+                    <label className="text-caption text-fg-secondary font-medium">{label}</label>
+                    <select
+                      defaultValue={value}
+                      className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary"
+                    >
+                      {options.map((o) => <option key={o}>{o}</option>)}
+                    </select>
+                  </div>
+                  {/* Edge-to-edge divider between fields — -mx-4 cancels the px-4 parent padding */}
+                  {idx < FORM_FIELDS.length - 1 && (
+                    <div className="-mx-4 border-t border-divider" />
+                  )}
+                </div>
+              ))}
+              <button
+                onClick={() => toast({ title: `Rule record ${selected.partNumber} deleted`, variant: 'error' })}
+                className="text-left text-destructive text-body font-medium hover:underline mt-4 mb-2"
+              >
+                Delete
+              </button>
+            </div>
+
+            {/* Footer — top divider flush edge-to-edge */}
+            <div className="px-4 py-3 border-t border-divider shrink-0 flex items-center justify-end gap-2">
+              <Button variant="secondary" onClick={() => setSelected(null)}>Discard</Button>
+              <Button variant="primary" onClick={() => toast({ title: `Rule config for ${selected.partNumber} submitted`, variant: 'success' })}>
+                Submit Change
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
