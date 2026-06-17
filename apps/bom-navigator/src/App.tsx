@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, type ReactElement } from 'react'
 import {
   AppShell,
   SidebarProvider,
@@ -31,7 +31,6 @@ import {
   DialogBody,
   DialogFooter,
   DialogTitle,
-  DialogDescription,
   DialogClose,
   DropdownMenu,
   DropdownMenuTrigger,
@@ -41,49 +40,53 @@ import {
   DropdownMenuLabel,
   Toaster,
   toast,
-} from "@qijenchen/design-system"
+} from '@qijenchen/design-system'
 import {
   LayoutDashboard,
-  Settings,
+  Server,
   List,
+  Settings,
+  Shuffle,
   Layers,
-  FileText,
   Search,
   Bell,
   HelpCircle,
   ChevronRight,
-  ChevronDown,
+  FileText,
+  Download,
   User,
   LogOut,
-  Eye,
-} from "lucide-react"
+} from 'lucide-react'
 
-// ─── Sidebar nav data ───────────────────────────────────────────────────────
-
+// ── Nav data ──
+const TOP_NAV = [{ id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard }] as const
 const BOM_NAV = [
-  { id: "bom-dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "configurator", label: "Configurator", icon: Settings },
-  { id: "parts-list", label: "Parts List", icon: List },
-  { id: "rule-engine", label: "Rule Engine", icon: Layers },
+  { id: 'site-master', label: 'Site Master', icon: Server },
+  { id: 'bom-viewer', label: 'BOM Viewer', icon: List },
+  { id: 'configurator', label: 'Configurator', icon: Settings },
+  { id: 'alternative', label: 'Alternative', icon: Shuffle },
+  { id: 'mass-part-creation', label: 'Mass Part Creation', icon: Layers },
 ] as const
-
 const LOT_OWNER_NAV = [
-  { id: "owner-a", label: "Owner A", icon: User },
-  { id: "owner-b", label: "Owner B", icon: User },
+  { id: 'tm6-lot', label: 'Interposer TM6 Config', icon: FileText },
 ] as const
-
 const BASIC_INFO_NAV = [
-  { id: "company-info", label: "Company Info", icon: FileText },
-  { id: "contact-details", label: "Contact Details", icon: FileText },
+  { id: 'tm6-1', label: 'Interposer TM6 Configurations', icon: FileText },
+  { id: 'tm6-2', label: 'Interposer TM6 Configurations', icon: FileText },
 ] as const
 
-// ─── Sidebar ─────────────────────────────────────────────────────────────────
+// ── Running Rule data ──
+const RUNNING_RULES = [
+  { code: 'ASGR100', desc: 'Assembly Run 100' },
+  { code: 'ASGR100', desc: 'Assembly Run 100' },
+  { code: 'ASGR200', desc: 'Assembly Run 200' },
+  { code: 'ASGR200', desc: 'Assembly Run 200' },
+  { code: 'ASGB200', desc: 'Assembly Block 200' },
+  { code: 'ASGB200', desc: 'Assembly Block 200' },
+] as const
 
+// ── AppSidebar ──
 function AppSidebar({ activeId, onActiveChange }: { activeId: string; onActiveChange: (id: string) => void }) {
-  const [bomOpen, setBomOpen] = useState(true)
-  const [lotOpen, setLotOpen] = useState(false)
-  const [basicOpen, setBasicOpen] = useState(false)
-
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -96,19 +99,31 @@ function AppSidebar({ activeId, onActiveChange }: { activeId: string; onActiveCh
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup collapsible open={bomOpen} onOpenChange={setBomOpen}>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {TOP_NAV.map(({ id, label, icon }) => (
+                <SidebarMenuItem key={id}>
+                  <SidebarMenuButton id={id} startIcon={icon} tooltip={label}
+                    isActive={activeId === id} onClick={() => onActiveChange(id)}>
+                    {label}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarSeparator />
+
+        <SidebarGroup collapsible defaultOpen>
           <SidebarGroupLabel>BOM</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {BOM_NAV.map(({ id, label, icon }) => (
                 <SidebarMenuItem key={id}>
-                  <SidebarMenuButton
-                    id={id}
-                    startIcon={icon}
-                    tooltip={label}
-                    isActive={activeId === id}
-                    onClick={() => onActiveChange(id)}
-                  >
+                  <SidebarMenuButton id={id} startIcon={icon} tooltip={label}
+                    isActive={activeId === id} onClick={() => onActiveChange(id)}>
                     {label}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -119,19 +134,14 @@ function AppSidebar({ activeId, onActiveChange }: { activeId: string; onActiveCh
 
         <SidebarSeparator />
 
-        <SidebarGroup collapsible open={lotOpen} onOpenChange={setLotOpen}>
+        <SidebarGroup collapsible>
           <SidebarGroupLabel>Lot Owner</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {LOT_OWNER_NAV.map(({ id, label, icon }) => (
                 <SidebarMenuItem key={id}>
-                  <SidebarMenuButton
-                    id={id}
-                    startIcon={icon}
-                    tooltip={label}
-                    isActive={activeId === id}
-                    onClick={() => onActiveChange(id)}
-                  >
+                  <SidebarMenuButton id={id} startIcon={icon} tooltip={label}
+                    isActive={activeId === id} onClick={() => onActiveChange(id)}>
                     {label}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -142,19 +152,14 @@ function AppSidebar({ activeId, onActiveChange }: { activeId: string; onActiveCh
 
         <SidebarSeparator />
 
-        <SidebarGroup collapsible open={basicOpen} onOpenChange={setBasicOpen}>
+        <SidebarGroup collapsible>
           <SidebarGroupLabel>Basic Information</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {BASIC_INFO_NAV.map(({ id, label, icon }) => (
                 <SidebarMenuItem key={id}>
-                  <SidebarMenuButton
-                    id={id}
-                    startIcon={icon}
-                    tooltip={label}
-                    isActive={activeId === id}
-                    onClick={() => onActiveChange(id)}
-                  >
+                  <SidebarMenuButton id={id} startIcon={icon} tooltip={label}
+                    isActive={activeId === id} onClick={() => onActiveChange(id)}>
                     {label}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -180,9 +185,73 @@ function AppSidebar({ activeId, onActiveChange }: { activeId: string; onActiveCh
   )
 }
 
-// ─── Chrome Header ────────────────────────────────────────────────────────────
+// ── Notification Dropdown ──
+const NOTIFICATIONS = [
+  { icon: '⚠️', title: 'Missing configuration detected', body: '5 parts in U337 have missing BOM configuration.', time: '2h ago' },
+  { icon: '📋', title: 'Submit reminder', body: '2 items in U337 are pending submission.', time: '5h ago' },
+  { icon: '✅', title: 'Recipe parse completed', body: 'RPJ-20260611-001: 12 rules extracted from ASGR100.', time: 'Yesterday' },
+] as const
 
-function TopHeader() {
+function NotificationMenu() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="relative p-2 rounded-md hover:bg-surface-hover text-fg-secondary">
+          <Bell size={18} />
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-notification border-2 border-surface" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-80">
+        <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {NOTIFICATIONS.map((n, i) => (
+          <DropdownMenuItem key={i} className="flex flex-col items-start gap-0.5 py-2.5">
+            <div className="flex items-center gap-2 w-full">
+              <span className="text-sm">{n.icon}</span>
+              <span className="text-body font-medium flex-1">{n.title}</span>
+              <span className="text-caption text-fg-tertiary">{n.time}</span>
+            </div>
+            <p className="text-caption text-fg-secondary pl-6">{n.body}</p>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
+// ── Profile Dropdown ──
+function ProfileMenu() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="flex items-center gap-2 rounded-md hover:bg-surface-hover px-2 py-1">
+          <Avatar alt="Jake Thompson" size={28} color="blue" />
+          <span className="text-body font-medium">Jake Thompson</span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-fg-tertiary">
+            <path d="M3 5l4 4 4-4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+          </svg>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-52">
+        <div className="px-3 py-2.5 flex items-center gap-2.5">
+          <Avatar alt="Jake Thompson" size={36} color="blue" />
+          <div>
+            <div className="text-body font-medium">Jake Thompson</div>
+            <div className="text-caption text-fg-secondary">jake@tsmc.com</div>
+          </div>
+        </div>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem startIcon={User}>My Profile</DropdownMenuItem>
+        <DropdownMenuItem startIcon={Settings}>Preferences</DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem startIcon={LogOut} className="text-destructive">Sign Out</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
+// ── Top Chrome Header ──
+function TopHeader(_: { rightSlot?: ReactElement<any, any> }) {
   return (
     <ChromeHeader className="bg-surface">
       <SidebarTrigger />
@@ -190,72 +259,35 @@ function TopHeader() {
         <div className="flex items-center gap-2 rounded-md border border-divider bg-surface px-3 h-9">
           <Search size={16} className="text-fg-tertiary shrink-0" />
           <input
-            className="flex-1 bg-transparent text-body outline-none placeholder:text-fg-tertiary"
-            placeholder="Search parts, BOMs..."
+            defaultValue="TM5678"
+            placeholder="Search part, BOM, product..."
+            className="flex-1 bg-transparent text-body text-fg-primary outline-none placeholder:text-fg-tertiary"
           />
         </div>
       </div>
       <div className="flex-1" />
       <div className="flex items-center gap-1">
-        {/* Alerts bell with red dot */}
         <button className="relative p-2 rounded-md hover:bg-surface-hover text-fg-secondary">
-          <Bell size={18} />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500" />
+          <Settings size={18} />
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-notification border-2 border-surface" />
         </button>
-
-        {/* Notifications dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="p-2 rounded-md hover:bg-surface-hover text-fg-secondary">
-              <Bell size={18} />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-64">
-            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>BOM U337 updated by Sarah M.</DropdownMenuItem>
-            <DropdownMenuItem>Rule ASGR200 approved</DropdownMenuItem>
-            <DropdownMenuItem>No more new notifications</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
+        <NotificationMenu />
         <button className="p-2 rounded-md hover:bg-surface-hover text-fg-secondary">
           <HelpCircle size={18} />
         </button>
-
-        {/* Profile dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 rounded-md hover:bg-surface-hover px-2 py-1">
-              <Avatar alt="Jake Thompson" size={28} color="blue" />
-              <span className="text-body font-medium">Jake Thompson</span>
-              <ChevronDown size={14} className="text-fg-tertiary" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>My Profile</DropdownMenuItem>
-            <DropdownMenuItem>Preferences</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Sign Out</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ProfileMenu />
       </div>
     </ChromeHeader>
   )
 }
 
-// ─── Stat card with dialog ────────────────────────────────────────────────────
+// ── Stat Card with Dialog ──
+type StatDialogContent = { title: string; body: ReactElement<any, any> }
 
-type StatCardProps = {
-  title: string
-  count: number
-  subtitle?: string
-  badge?: React.ReactNode
-  dialogTitle: string
-  dialogContent: React.ReactNode
-}
-
-function StatCard({ title, count, subtitle, badge, dialogTitle, dialogContent }: StatCardProps) {
+function StatCard({ title, count, subtitle, badge, dialog }: {
+  title: string; count: number; subtitle: string
+  badge?: ReactElement<any, any>; dialog: StatDialogContent
+}) {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -266,19 +298,18 @@ function StatCard({ title, count, subtitle, badge, dialogTitle, dialogContent }:
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold">{count}</span>
+              <span className="text-h3 font-semibold">{count}</span>
               {subtitle && <span className="text-body text-fg-secondary">{subtitle}</span>}
             </div>
             <ChevronRight size={16} className="text-fg-tertiary" />
           </div>
         </div>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{dialogTitle}</DialogTitle>
-          <DialogDescription>Review and take action on items below.</DialogDescription>
+          <DialogTitle>{dialog.title}</DialogTitle>
         </DialogHeader>
-        <DialogBody>{dialogContent}</DialogBody>
+        <DialogBody>{dialog.body}</DialogBody>
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="secondary">Close</Button>
@@ -289,58 +320,68 @@ function StatCard({ title, count, subtitle, badge, dialogTitle, dialogContent }:
   )
 }
 
-// ─── Edit dialog ──────────────────────────────────────────────────────────────
-
-function EditDialog({ code }: { code: string }) {
-  const [open, setOpen] = useState(false)
-  const [partCode, setPartCode] = useState(code)
-  const [description, setDescription] = useState("Assembly part for U337 configuration")
-  const [status, setStatus] = useState("Active")
-
-  function handleSave() {
-    toast({ title: "Changes saved for " + partCode, variant: "success" })
-    setOpen(false)
-  }
-
+// ── Simple table components ──
+function SimpleTable({ heads, rows }: { heads: string[]; rows: ReactElement<any, any>[] }) {
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="secondary" size="sm">Edit</Button>
-      </DialogTrigger>
-      <DialogContent>
+    <div className="rounded-lg border border-divider overflow-hidden">
+      <table className="w-full text-body border-collapse">
+        <thead>
+          <tr className="bg-surface-secondary border-b border-divider">
+            {heads.map((h) => (
+              <th key={h} className="text-left px-3 py-2 text-caption text-fg-secondary font-medium whitespace-nowrap">{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>{rows}</tbody>
+      </table>
+    </div>
+  )
+}
+
+function Chip({ label, color }: { label: string; color: 'green' | 'orange' | 'gray' }) {
+  const cls = {
+    green: 'bg-green-50 text-green-700 border-green-200',
+    orange: 'bg-amber-50 text-amber-700 border-amber-200',
+    gray: 'bg-surface-secondary text-fg-secondary border-divider',
+  }[color]
+  return <span className={`inline-flex px-2 py-0.5 rounded-full text-caption font-medium border ${cls}`}>{label}</span>
+}
+
+// ── Edit Dialog ──
+function EditDialog({ code, desc, children }: { code: string; desc: string; children: ReactElement<any, any> }) {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Edit — {code}</DialogTitle>
-          <DialogDescription>Update the part configuration details below.</DialogDescription>
         </DialogHeader>
         <DialogBody>
           <div className="space-y-4">
-            <div>
-              <label className="block text-body-sm font-medium mb-1">Part Code</label>
-              <input
-                className="w-full rounded-md border border-divider px-3 py-2 text-body bg-surface outline-none focus:ring-2 focus:ring-primary"
-                value={partCode}
-                onChange={(e) => setPartCode(e.target.value)}
-              />
+            <div className="flex flex-col gap-1">
+              <label className="text-caption text-fg-secondary font-medium">Part Code</label>
+              <input defaultValue={code} className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" />
             </div>
-            <div>
-              <label className="block text-body-sm font-medium mb-1">Description</label>
-              <input
-                className="w-full rounded-md border border-divider px-3 py-2 text-body bg-surface outline-none focus:ring-2 focus:ring-primary"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
+            <div className="flex flex-col gap-1">
+              <label className="text-caption text-fg-secondary font-medium">Description</label>
+              <input defaultValue={desc} className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" />
             </div>
-            <div>
-              <label className="block text-body-sm font-medium mb-1">Status</label>
-              <select
-                className="w-full rounded-md border border-divider px-3 py-2 text-body bg-surface outline-none focus:ring-2 focus:ring-primary"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-              >
+            <div className="flex flex-col gap-1">
+              <label className="text-caption text-fg-secondary font-medium">Status</label>
+              <select className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary">
                 <option>Active</option>
                 <option>Pending Review</option>
                 <option>Inactive</option>
                 <option>Deprecated</option>
+              </select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-caption text-fg-secondary font-medium">Assigned Reviewer</label>
+              <select className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary">
+                <option>Jake Thompson</option>
+                <option>Sarah Lin</option>
+                <option>Mike Chen</option>
+                <option>— Unassigned —</option>
               </select>
             </div>
           </div>
@@ -349,296 +390,245 @@ function EditDialog({ code }: { code: string }) {
           <DialogClose asChild>
             <Button variant="secondary">Cancel</Button>
           </DialogClose>
-          <Button variant="primary" onClick={handleSave}>Save Changes</Button>
+          <DialogClose asChild>
+            <Button variant="primary" onClick={() => toast({ title: `Changes saved for ${code}`, variant: 'success' })}>
+              Save Changes
+            </Button>
+          </DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   )
 }
 
-// ─── Product / Rule list row ──────────────────────────────────────────────────
-
-function ItemRow({ code }: { code: string }) {
+// ── List Item Row ──
+function ListItemRow({ code, desc }: { code: string; desc: string }) {
   return (
-    <div className="flex items-center justify-between px-4 py-3 rounded-lg border border-divider bg-surface">
+    <div className="flex items-center gap-2 px-4 py-3 rounded-lg border border-divider bg-surface">
       <span className="text-body font-medium">{code}</span>
-      <EditDialog code={code} />
+      <span className="text-fg-tertiary text-body">—</span>
+      <span className="text-body text-fg-secondary flex-1 truncate">{desc}</span>
+      <EditDialog code={code} desc={desc}>
+        <Button variant="secondary" size="sm">Edit</Button>
+      </EditDialog>
     </div>
   )
 }
 
-// ─── Dashboard tab content ────────────────────────────────────────────────────
-
-const WAIT_SUBMIT_ITEMS = ["ASGR100", "ASGB100"]
-const MISSING_CONFIG_ITEMS = ["ASGR100", "ASGB100", "ASGR200", "ASGB200", "ASGR300"]
-const IN_PRODUCTION_ITEMS = [
-  { lot: "LOT-2401", part: "ASGR100", stage: "Assembly" },
-  { lot: "LOT-2402", part: "ASGB100", stage: "Testing" },
-]
-
+// ── Dashboard Tab Content ──
 function DashboardTab() {
-  return (
-    <div className="space-y-6">
-      {/* Stat cards */}
-      <div className="flex gap-4">
-        <StatCard
-          title="Wait to submit"
-          count={2}
-          subtitle="need to handle"
-          dialogTitle="Wait to Submit"
-          dialogContent={
-            <table className="w-full text-body">
-              <thead>
-                <tr className="border-b border-divider text-fg-secondary">
-                  <th className="text-left py-2 font-medium">Part</th>
-                  <th className="text-right py-2 font-medium">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {WAIT_SUBMIT_ITEMS.map((item) => (
-                  <tr key={item} className="border-b border-divider">
-                    <td className="py-2">{item}</td>
-                    <td className="py-2 text-right">
-                      <Button variant="primary" size="sm">Submit</Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          }
-        />
-
-        <StatCard
-          title="Missing configuration"
-          count={5}
-          subtitle="need to handle"
-          dialogTitle="Missing Configuration"
-          dialogContent={
-            <table className="w-full text-body">
-              <thead>
-                <tr className="border-b border-divider text-fg-secondary">
-                  <th className="text-left py-2 font-medium">Part</th>
-                  <th className="text-right py-2 font-medium">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {MISSING_CONFIG_ITEMS.map((item) => (
-                  <tr key={item} className="border-b border-divider">
-                    <td className="py-2">{item}</td>
-                    <td className="py-2 text-right">
-                      <Button variant="secondary" size="sm">Fix</Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          }
-        />
-
-        <StatCard
-          title="In Production"
-          count={2}
-          badge={<span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 border border-amber-200">Pending</span>}
-          dialogTitle="In Production"
-          dialogContent={
-            <table className="w-full text-body">
-              <thead>
-                <tr className="border-b border-divider text-fg-secondary">
-                  <th className="text-left py-2 font-medium">Lot</th>
-                  <th className="text-left py-2 font-medium">Part</th>
-                  <th className="text-left py-2 font-medium">Stage</th>
-                </tr>
-              </thead>
-              <tbody>
-                {IN_PRODUCTION_ITEMS.map((row) => (
-                  <tr key={row.lot} className="border-b border-divider">
-                    <td className="py-2">{row.lot}</td>
-                    <td className="py-2">{row.part}</td>
-                    <td className="py-2">{row.stage}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          }
-        />
-      </div>
-
-      {/* Products */}
-      <section>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-body-lg font-semibold">Products</h2>
-          <Button variant="link" size="sm">View more</Button>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <ItemRow code="ASGR100" />
-          <ItemRow code="ASGB100" />
-        </div>
-      </section>
-
-      {/* Running Rules */}
-      <section>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-body-lg font-semibold">Running Rules</h2>
-          <Button variant="link" size="sm">View more</Button>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          {["ASGR100", "ASGR100", "ASGR200", "ASGR200", "ASGB200", "ASGB200"].map((code, i) => (
-            <ItemRow key={i} code={code} />
-          ))}
-        </div>
-      </section>
-    </div>
-  )
-}
-
-// ─── Recipe Parsing tab ───────────────────────────────────────────────────────
-
-const RECIPE_ROWS = [
-  { job: "JOB-001", part: "ASGR100", started: "2024-01-15", status: "Completed", result: "3 recipes found" },
-  { job: "JOB-002", part: "ASGB100", started: "2024-01-16", status: "Processing", result: "In progress..." },
-  { job: "JOB-003", part: "ASGR200", started: "2024-01-17", status: "Queued", result: "Pending" },
-]
-
-function statusChip(status: string) {
-  if (status === "Completed") return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Completed</span>
-  if (status === "Processing") return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">Processing</span>
-  return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Queued</span>
-}
-
-function RecipeParsingTab() {
-  return (
-    <div>
-      <table className="w-full text-body border border-divider rounded-lg overflow-hidden">
-        <thead className="bg-surface-secondary">
-          <tr>
-            <th className="text-left px-4 py-3 font-medium text-fg-secondary">Job ID</th>
-            <th className="text-left px-4 py-3 font-medium text-fg-secondary">Part</th>
-            <th className="text-left px-4 py-3 font-medium text-fg-secondary">Started</th>
-            <th className="text-left px-4 py-3 font-medium text-fg-secondary">Status</th>
-            <th className="text-left px-4 py-3 font-medium text-fg-secondary">Result</th>
-            <th className="px-4 py-3"></th>
+  const waitDialog: StatDialogContent = {
+    title: 'Wait to Submit — 2 items',
+    body: (
+      <SimpleTable
+        heads={['Part', 'Pending Since', 'Action']}
+        rows={[
+          <tr key="r1" className="border-b border-divider last:border-0 hover:bg-surface-secondary">
+            <td className="px-3 py-2">ASGR100</td>
+            <td className="px-3 py-2 text-fg-secondary">2026-06-10</td>
+            <td className="px-3 py-2"><Button variant="primary" size="sm" onClick={() => toast({ title: 'Submitting ASGR100...', variant: 'info' })}>Submit</Button></td>
+          </tr>,
+          <tr key="r2" className="hover:bg-surface-secondary">
+            <td className="px-3 py-2">ASGB100</td>
+            <td className="px-3 py-2 text-fg-secondary">2026-06-09</td>
+            <td className="px-3 py-2"><Button variant="primary" size="sm" onClick={() => toast({ title: 'Submitting ASGB100...', variant: 'info' })}>Submit</Button></td>
+          </tr>,
+        ]}
+      />
+    ),
+  }
+  const missingDialog: StatDialogContent = {
+    title: 'Missing Configuration — 5 items',
+    body: (
+      <SimpleTable
+        heads={['Part', 'Missing Field', 'Action']}
+        rows={[
+          ['ASGR100', 'TM6 Mapping'],
+          ['ASGB100', 'Recipe Ref'],
+          ['ASGR200', 'TM6 Mapping'],
+          ['TM6-SUB', 'Site Assignment'],
+          ['INTERP-V2', 'Version Lock'],
+        ].map(([part, field]) => (
+          <tr key={part} className="border-b border-divider last:border-0 hover:bg-surface-secondary">
+            <td className="px-3 py-2">{part}</td>
+            <td className="px-3 py-2 text-destructive">{field}</td>
+            <td className="px-3 py-2"><Button variant="secondary" size="sm" onClick={() => toast({ title: `Editing ${part}...`, variant: 'info' })}>Fix</Button></td>
           </tr>
-        </thead>
-        <tbody>
-          {RECIPE_ROWS.map((row) => (
-            <tr key={row.job} className="border-t border-divider hover:bg-surface-hover">
-              <td className="px-4 py-3 font-medium">{row.job}</td>
-              <td className="px-4 py-3">{row.part}</td>
-              <td className="px-4 py-3 text-fg-secondary">{row.started}</td>
-              <td className="px-4 py-3">{statusChip(row.status)}</td>
-              <td className="px-4 py-3 text-fg-secondary">{row.result}</td>
-              <td className="px-4 py-3">
-                <Button variant="tertiary" size="sm" startIcon={Eye}>View</Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
-}
-
-// ─── Traceability tab ─────────────────────────────────────────────────────────
-
-const TRACE_ROWS = [
-  { component: "ASGR100", version: "v1.2", usedIn: "U337", changedBy: "Jake T.", date: "2024-01-10", status: "Active" },
-  { component: "ASGB100", version: "v2.0", usedIn: "U338", changedBy: "Sarah M.", date: "2024-01-12", status: "Active" },
-  { component: "ASGR200", version: "v1.5", usedIn: "U337", changedBy: "Mike R.", date: "2024-01-14", status: "Review" },
-  { component: "ASGB200", version: "v3.1", usedIn: "U339", changedBy: "Lisa K.", date: "2024-01-16", status: "Archived" },
-]
-
-function traceStatusChip(status: string) {
-  if (status === "Active") return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Active</span>
-  if (status === "Review") return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">Review</span>
-  return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Archived</span>
-}
-
-function TraceabilityTab() {
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-body-lg font-semibold">Component History</h2>
-        <Button variant="secondary" size="sm">Export</Button>
-      </div>
-      <table className="w-full text-body border border-divider rounded-lg overflow-hidden">
-        <thead className="bg-surface-secondary">
-          <tr>
-            <th className="text-left px-4 py-3 font-medium text-fg-secondary">Component</th>
-            <th className="text-left px-4 py-3 font-medium text-fg-secondary">Version</th>
-            <th className="text-left px-4 py-3 font-medium text-fg-secondary">Used In</th>
-            <th className="text-left px-4 py-3 font-medium text-fg-secondary">Changed By</th>
-            <th className="text-left px-4 py-3 font-medium text-fg-secondary">Date</th>
-            <th className="text-left px-4 py-3 font-medium text-fg-secondary">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {TRACE_ROWS.map((row) => (
-            <tr key={row.component + row.date} className="border-t border-divider hover:bg-surface-hover">
-              <td className="px-4 py-3 font-medium">{row.component}</td>
-              <td className="px-4 py-3">{row.version}</td>
-              <td className="px-4 py-3">{row.usedIn}</td>
-              <td className="px-4 py-3">{row.changedBy}</td>
-              <td className="px-4 py-3 text-fg-secondary">{row.date}</td>
-              <td className="px-4 py-3">{traceStatusChip(row.status)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
-}
-
-// ─── Rule Settings tab ────────────────────────────────────────────────────────
-
-const RULES = [
-  { id: "auto-sync", label: "Auto-sync BOM", description: "Automatically synchronize bill of materials on save", defaultOn: true },
-  { id: "validation", label: "Validation Rules", description: "Enable strict validation for part configurations", defaultOn: true },
-  { id: "mass-edit", label: "Mass Edit Mode", description: "Allow bulk editing of multiple parts simultaneously", defaultOn: false },
-  { id: "audit-trail", label: "Audit Trail", description: "Track all changes with timestamps and user info", defaultOn: true },
-  { id: "auto-approve", label: "Auto-approve Simple Rules", description: "Automatically approve rules with low complexity score", defaultOn: false },
-]
-
-function RuleSettingsTab() {
-  const [enabled, setEnabled] = useState<Record<string, boolean>>(
-    Object.fromEntries(RULES.map((r) => [r.id, r.defaultOn]))
-  )
-
-  function handleSave() {
-    toast({ title: "Rule settings saved", variant: "success" })
+        ))}
+      />
+    ),
+  }
+  const prodDialog: StatDialogContent = {
+    title: 'In Production — 2 items',
+    body: (
+      <>
+        <p className="text-body text-fg-secondary mb-4">Items in active production. Changes require a CCB review.</p>
+        <SimpleTable
+          heads={['Part', 'Lot', 'Started', 'Status']}
+          rows={[
+            <tr key="p1" className="border-b border-divider hover:bg-surface-secondary">
+              <td className="px-3 py-2 font-medium">ASGR100</td>
+              <td className="px-3 py-2 font-mono text-caption">LOT-2026-0611</td>
+              <td className="px-3 py-2 text-fg-secondary">2026-06-11</td>
+              <td className="px-3 py-2"><Chip label="Warning" color="orange" /></td>
+            </tr>,
+            <tr key="p2" className="hover:bg-surface-secondary">
+              <td className="px-3 py-2 font-medium">ASGB100</td>
+              <td className="px-3 py-2 font-mono text-caption">LOT-2026-0608</td>
+              <td className="px-3 py-2 text-fg-secondary">2026-06-08</td>
+              <td className="px-3 py-2"><Chip label="On Track" color="green" /></td>
+            </tr>,
+          ]}
+        />
+      </>
+    ),
   }
 
   return (
-    <div className="space-y-4">
-      {RULES.map((rule) => (
-        <div key={rule.id} className="flex items-center justify-between p-4 rounded-lg border border-divider bg-surface">
-          <div>
-            <p className="text-body font-medium">{rule.label}</p>
-            <p className="text-body-sm text-fg-secondary mt-0.5">{rule.description}</p>
-          </div>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              className="sr-only peer"
-              checked={enabled[rule.id]}
-              onChange={(e) => setEnabled((prev) => ({ ...prev, [rule.id]: e.target.checked }))}
-            />
-            <div className="w-10 h-6 bg-gray-200 peer-checked:bg-blue-600 rounded-full transition-colors peer-focus:ring-2 peer-focus:ring-blue-500 relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-5 after:h-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-4" />
-          </label>
+    <div className="space-y-6">
+      <section>
+        <h2 className="text-body-lg font-semibold mb-3">Summary</h2>
+        <div className="flex gap-4">
+          <StatCard title="Wait to submit" count={2} subtitle="need to handle" dialog={waitDialog} />
+          <StatCard title="Missing configuration" count={5} subtitle="need to handle" dialog={missingDialog} />
+          <StatCard
+            title="In Production" count={2} subtitle="" dialog={prodDialog}
+            badge={<span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-caption font-medium border border-amber-200">Pending</span>}
+          />
         </div>
-      ))}
-      <div className="pt-2">
-        <Button variant="primary" onClick={handleSave}>Save Changes</Button>
+      </section>
+
+      <section>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-body-lg font-semibold">Product list</h2>
+          <Button variant="link" size="sm" onClick={() => toast({ title: 'Loading full product list...' })}>View more</Button>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <ListItemRow code="ASGR100" desc="Assembly Run 100" />
+          <ListItemRow code="ASGB100" desc="Assembly Block 100" />
+        </div>
+      </section>
+
+      <section>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-body-lg font-semibold">Running Rule</h2>
+          <Button variant="link" size="sm" onClick={() => toast({ title: 'Loading all running rules...' })}>View more</Button>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {RUNNING_RULES.map((r, i) => (
+            <ListItemRow key={i} code={r.code} desc={r.desc} />
+          ))}
+        </div>
+      </section>
+    </div>
+  )
+}
+
+// ── Recipe Parsing Tab ──
+function RecipeTab() {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-body-lg font-semibold">Recipe Parsing</h2>
+        <Button variant="primary" size="sm" onClick={() => toast({ title: 'New recipe parse job started for U337', variant: 'success' })}>
+          + New Parse Job
+        </Button>
+      </div>
+      <SimpleTable
+        heads={['Job ID', 'Part', 'Started', 'Status', 'Result', 'Action']}
+        rows={[
+          { id: 'RPJ-20260611-001', part: 'ASGR100', date: '2026-06-11 09:32', status: <Chip label="Completed" color="green" />, result: '12 rules extracted' },
+          { id: 'RPJ-20260610-003', part: 'ASGB100', date: '2026-06-10 14:15', status: <Chip label="Warning" color="orange" />, result: '8 rules, 2 conflicts' },
+          { id: 'RPJ-20260609-007', part: 'ASGR100', date: '2026-06-09 16:48', status: <Chip label="Archived" color="gray" />, result: '10 rules extracted' },
+        ].map((row) => (
+          <tr key={row.id} className="border-b border-divider last:border-0 hover:bg-surface-secondary">
+            <td className="px-3 py-2 font-mono text-caption">{row.id}</td>
+            <td className="px-3 py-2">{row.part}</td>
+            <td className="px-3 py-2 text-fg-secondary text-caption">{row.date}</td>
+            <td className="px-3 py-2">{row.status}</td>
+            <td className="px-3 py-2 text-fg-secondary">{row.result}</td>
+            <td className="px-3 py-2">
+              <Button variant="secondary" size="sm" onClick={() => toast({ title: `Viewing ${row.id}` })}>View</Button>
+            </td>
+          </tr>
+        ))}
+      />
+    </div>
+  )
+}
+
+// ── Traceability Tab ──
+function TraceabilityTab() {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-body-lg font-semibold">Traceability — U337</h2>
+        <Button variant="secondary" size="sm" startIcon={Download} onClick={() => toast({ title: 'Exporting traceability report...' })}>
+          Export
+        </Button>
+      </div>
+      <SimpleTable
+        heads={['Component', 'Version', 'Used In', 'Changed By', 'Date', 'Status']}
+        rows={[
+          { comp: 'ASGR100', ver: 'v2.3.1', usedIn: 'U337, U338', by: 'Jake T.', date: '2026-06-10', status: <Chip label="Active" color="green" /> },
+          { comp: 'ASGB100', ver: 'v1.8.0', usedIn: 'U337', by: 'Sarah L.', date: '2026-06-08', status: <Chip label="Review" color="orange" /> },
+          { comp: 'TM6-CORE', ver: 'v4.0.2', usedIn: 'U337, U340, U341', by: 'System', date: '2026-06-01', status: <Chip label="Active" color="green" /> },
+          { comp: 'INTERP-V3', ver: 'v3.1.0', usedIn: 'U337', by: 'Mike C.', date: '2026-05-28', status: <Chip label="Deprecated" color="gray" /> },
+        ].map((row) => (
+          <tr key={row.comp} className="border-b border-divider last:border-0 hover:bg-surface-secondary">
+            <td className="px-3 py-2 font-medium">{row.comp}</td>
+            <td className="px-3 py-2 text-fg-secondary">{row.ver}</td>
+            <td className="px-3 py-2 text-fg-secondary">{row.usedIn}</td>
+            <td className="px-3 py-2 text-fg-secondary">{row.by}</td>
+            <td className="px-3 py-2 text-fg-secondary">{row.date}</td>
+            <td className="px-3 py-2">{row.status}</td>
+          </tr>
+        ))}
+      />
+    </div>
+  )
+}
+
+// ── Rule Settings Tab ──
+const RULES = [
+  { label: 'Auto-assign on submit', desc: 'Automatically assign reviewer when part is submitted for approval.', defaultOn: true },
+  { label: 'Validate on configuration change', desc: 'Run validation rules automatically when BOM configuration changes.', defaultOn: true },
+  { label: 'Block production on missing config', desc: 'Prevent production release when required BOM fields are incomplete.', defaultOn: false },
+  { label: 'Notify on recipe conflict', desc: 'Send notification when a recipe parsing job detects rule conflicts.', defaultOn: true },
+  { label: 'Enforce TM6 interposer constraints', desc: 'Apply Interposer TM6 compatibility rules across all running rule evaluations.', defaultOn: true },
+] as const
+
+function RuleSettingsTab() {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-body-lg font-semibold">Rule Settings</h2>
+        <Button variant="primary" size="sm" onClick={() => toast({ title: 'Rule settings saved', variant: 'success' })}>
+          Save Changes
+        </Button>
+      </div>
+      <div className="flex flex-col gap-2">
+        {RULES.map((rule) => (
+          <div key={rule.label} className="flex items-center gap-4 px-4 py-3 rounded-lg border border-divider bg-surface">
+            <div className="flex-1">
+              <div className="text-body font-medium">{rule.label}</div>
+              <div className="text-caption text-fg-secondary mt-0.5">{rule.desc}</div>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+              <input type="checkbox" defaultChecked={rule.defaultOn} className="sr-only peer" />
+              <div className="w-9 h-5 bg-surface-secondary rounded-full peer peer-checked:bg-primary transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-surface after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4 after:shadow-sm" />
+            </label>
+          </div>
+        ))}
       </div>
     </div>
   )
 }
 
-// ─── Main Configurator page ───────────────────────────────────────────────────
-
-function ConfiguratorDashboard() {
+// ── Configurator Page ──
+function ConfiguratorPage() {
   return (
-    <div className="px-6 py-5 space-y-6">
-      {/* Breadcrumb */}
+    <div className="px-6 py-5 space-y-5">
       <div className="flex items-center gap-1 text-body text-fg-secondary">
         <span className="hover:text-fg-primary cursor-pointer">Product Master</span>
         <span className="mx-1">/</span>
@@ -646,13 +636,14 @@ function ConfiguratorDashboard() {
         <span className="mx-1">/</span>
       </div>
 
-      {/* Title row */}
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">U337</h1>
-        <Button variant="secondary" size="md" startIcon={Layers}>Mass Part Creation</Button>
+        <h1 className="text-h3 font-semibold">U337</h1>
+        <Button variant="secondary" size="md" startIcon={Layers}
+          onClick={() => toast({ title: 'Mass Part Creation dialog opened' })}>
+          Mass Part Creation
+        </Button>
       </div>
 
-      {/* Tabs */}
       <Tabs defaultValue="dashboard">
         <TabsList size="lg">
           <TabsTrigger value="dashboard" badge={<Badge count={99} max={99} variant="high" />}>
@@ -662,29 +653,18 @@ function ConfiguratorDashboard() {
           <TabsTrigger value="traceability">Traceability</TabsTrigger>
           <TabsTrigger value="rule-settings">Rule Settings</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="dashboard" className="mt-6">
-          <DashboardTab />
-        </TabsContent>
-        <TabsContent value="recipe-parsing" className="mt-6">
-          <RecipeParsingTab />
-        </TabsContent>
-        <TabsContent value="traceability" className="mt-6">
-          <TraceabilityTab />
-        </TabsContent>
-        <TabsContent value="rule-settings" className="mt-6">
-          <RuleSettingsTab />
-        </TabsContent>
+        <TabsContent value="dashboard" className="mt-6"><DashboardTab /></TabsContent>
+        <TabsContent value="recipe-parsing" className="mt-6"><RecipeTab /></TabsContent>
+        <TabsContent value="traceability" className="mt-6"><TraceabilityTab /></TabsContent>
+        <TabsContent value="rule-settings" className="mt-6"><RuleSettingsTab /></TabsContent>
       </Tabs>
     </div>
   )
 }
 
-// ─── App root ─────────────────────────────────────────────────────────────────
-
+// ── Root ──
 export default function App() {
-  const [activeId, setActiveId] = useState<string>("configurator")
-
+  const [activeId, setActiveId] = useState<string>('configurator')
   return (
     <TooltipProvider delayDuration={500} skipDelayDuration={300}>
       <SidebarProvider activeId={activeId} onActiveChange={setActiveId}>
@@ -693,7 +673,7 @@ export default function App() {
           sidebar={<AppSidebar activeId={activeId} onActiveChange={setActiveId} />}
           header={<TopHeader />}
         >
-          <ConfiguratorDashboard />
+          <ConfiguratorPage />
         </AppShell>
       </SidebarProvider>
       <Toaster />
