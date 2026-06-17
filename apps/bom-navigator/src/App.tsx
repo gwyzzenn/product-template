@@ -32,6 +32,14 @@ import {
   DialogFooter,
   DialogTitle,
   DialogClose,
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetBody,
+  SheetFooter,
+  SheetClose,
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
@@ -57,10 +65,11 @@ import {
   User,
   LogOut,
   Plane,
+  Wrench,
+  Info,
 } from 'lucide-react'
 
 // ── Aircraft: A321-200 MSN-7834 ──
-// ATA chapter-based part breakdown
 const AIRCRAFT_MSN = 'MSN-7834'
 const AIRCRAFT_TYPE = 'A321-200'
 
@@ -85,13 +94,15 @@ const AIRCRAFT_SPEC_NAV = [
 
 // ATA chapter part codes for A321-200
 const RUNNING_PARTS = [
-  { code: '32-10-11-001', desc: 'MLG Assembly — LH (ATA 32)' },
-  { code: '32-10-12-001', desc: 'MLG Assembly — RH (ATA 32)' },
-  { code: '27-10-00-001', desc: 'Aileron Assembly — LH (ATA 27)' },
-  { code: '27-10-00-002', desc: 'Aileron Assembly — RH (ATA 27)' },
-  { code: '49-00-00-001', desc: 'APU APS3200 Assembly (ATA 49)' },
-  { code: '21-20-00-001', desc: 'Air Cycle Machine Assembly (ATA 21)' },
-] as const
+  { code: '32-10-11-001', desc: 'MLG Assembly — LH', ata: 'ATA 32', rev: 'Rev.D', status: 'Active', msn: 'MSN-7834, MSN-7836', engineer: 'Jake Thompson', date: '2026-06-01' },
+  { code: '32-10-12-001', desc: 'MLG Assembly — RH', ata: 'ATA 32', rev: 'Rev.D', status: 'Active', msn: 'MSN-7834, MSN-7836', engineer: 'Sarah Lin', date: '2026-06-01' },
+  { code: '27-10-00-001', desc: 'Aileron Assembly — LH', ata: 'ATA 27', rev: 'Rev.B', status: 'Pending Review', msn: 'MSN-7834', engineer: 'Mike Chen', date: '2026-06-05' },
+  { code: '27-10-00-002', desc: 'Aileron Assembly — RH', ata: 'ATA 27', rev: 'Rev.B', status: 'Pending Review', msn: 'MSN-7834', engineer: 'Mike Chen', date: '2026-06-05' },
+  { code: '49-00-00-001', desc: 'APU APS3200 Assembly', ata: 'ATA 49', rev: 'Rev.A', status: 'Superseded', msn: 'MSN-7834', engineer: 'System', date: '2026-05-28' },
+  { code: '21-20-00-001', desc: 'Air Cycle Machine Assembly', ata: 'ATA 21', rev: 'Rev.C', status: 'Active', msn: 'MSN-7834, MSN-7835', engineer: 'Jake Thompson', date: '2026-06-08' },
+]
+
+type PartRecord = { code: string; desc: string; ata: string; rev: string; status: string; msn: string; engineer: string; date: string }
 
 // ── AppSidebar ──
 function AppSidebar({ activeId, onActiveChange }: { activeId: string; onActiveChange: (id: string) => void }) {
@@ -122,7 +133,7 @@ function AppSidebar({ activeId, onActiveChange }: { activeId: string; onActiveCh
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarSeparator />
+        <SidebarSeparator className="mx-0" />
 
         <SidebarGroup collapsible defaultOpen>
           <SidebarGroupLabel>Aircraft Components</SidebarGroupLabel>
@@ -140,7 +151,7 @@ function AppSidebar({ activeId, onActiveChange }: { activeId: string; onActiveCh
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarSeparator />
+        <SidebarSeparator className="mx-0" />
 
         <SidebarGroup collapsible>
           <SidebarGroupLabel>Aircraft Owner</SidebarGroupLabel>
@@ -158,7 +169,7 @@ function AppSidebar({ activeId, onActiveChange }: { activeId: string; onActiveCh
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarSeparator />
+        <SidebarSeparator className="mx-0" />
 
         <SidebarGroup collapsible>
           <SidebarGroupLabel>Aircraft Spec</SidebarGroupLabel>
@@ -289,7 +300,173 @@ function TopHeader(_: { rightSlot?: ReactElement<any, any> }) {
   )
 }
 
-// ── Stat Card with Dialog ──
+// ── Chip ──
+function Chip({ label, color }: { label: string; color: 'green' | 'orange' | 'gray' }) {
+  const cls = {
+    green: 'bg-green-50 text-green-700 border-green-200',
+    orange: 'bg-amber-50 text-amber-700 border-amber-200',
+    gray: 'bg-surface-secondary text-fg-secondary border-divider',
+  }[color]
+  return <span className={`inline-flex px-2 py-0.5 rounded-full text-caption font-medium border ${cls}`}>{label}</span>
+}
+
+// ── Simple table ──
+function SimpleTable({ heads, rows }: { heads: string[]; rows: ReactElement<any, any>[] }) {
+  return (
+    <div className="rounded-lg border border-divider overflow-hidden">
+      <table className="w-full text-body border-collapse">
+        <thead>
+          <tr className="bg-surface-secondary border-b border-divider">
+            {heads.map((h) => (
+              <th key={h} className="text-left px-3 py-2 text-caption text-fg-secondary font-medium whitespace-nowrap">{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>{rows}</tbody>
+      </table>
+    </div>
+  )
+}
+
+// ── Edit Dialog (second-level modal) ──
+function EditPartDialog({ part, children }: { part: PartRecord; children: ReactElement<any, any> }) {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Edit — {part.code}</DialogTitle>
+        </DialogHeader>
+        <DialogBody>
+          <div className="space-y-4">
+            <div className="flex flex-col gap-1">
+              <label className="text-caption text-fg-secondary font-medium">Part Number</label>
+              <input defaultValue={part.code} className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-caption text-fg-secondary font-medium">Description</label>
+              <input defaultValue={part.desc} className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-caption text-fg-secondary font-medium">ATA Chapter</label>
+              <select defaultValue={part.ata} className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary">
+                <option>ATA 21 — Air Conditioning</option>
+                <option>ATA 27 — Flight Controls</option>
+                <option>ATA 32 — Landing Gear</option>
+                <option>ATA 49 — APU</option>
+                <option>ATA 53 — Fuselage</option>
+                <option>ATA 57 — Wings</option>
+              </select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-caption text-fg-secondary font-medium">Status</label>
+              <select defaultValue={part.status} className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary">
+                <option>Active</option>
+                <option>Pending Review</option>
+                <option>Inactive</option>
+                <option>Superseded</option>
+              </select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-caption text-fg-secondary font-medium">Assigned Engineer</label>
+              <select defaultValue={part.engineer} className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary">
+                <option>Jake Thompson</option>
+                <option>Sarah Lin</option>
+                <option>Mike Chen</option>
+                <option>— Unassigned —</option>
+              </select>
+            </div>
+          </div>
+        </DialogBody>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="secondary">Cancel</Button>
+          </DialogClose>
+          <DialogClose asChild>
+            <Button variant="primary" onClick={() => toast({ title: `Changes saved for ${part.code}`, variant: 'success' })}>
+              Save Changes
+            </Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// ── Part Detail Panel (first-level Sheet) ──
+function PartDetailPanel({ part, children }: { part: PartRecord; children: ReactElement<any, any> }) {
+  const statusColor: 'green' | 'orange' | 'gray' =
+    part.status === 'Active' ? 'green' : part.status === 'Pending Review' ? 'orange' : 'gray'
+  return (
+    <Sheet>
+      <SheetTrigger asChild>{children}</SheetTrigger>
+      <SheetContent side="right" className="flex flex-col sm:max-w-md">
+        <SheetHeader>
+          <SheetTitle className="font-mono">{part.code}</SheetTitle>
+        </SheetHeader>
+        <SheetBody className="flex flex-col gap-5">
+          <div className="flex items-center gap-2">
+            <Chip label={part.status} color={statusColor} />
+            <span className="text-caption text-fg-tertiary">{part.rev}</span>
+          </div>
+
+          <div className="rounded-lg border border-divider divide-y divide-divider">
+            {[
+              { label: 'Description', value: part.desc },
+              { label: 'ATA Chapter', value: part.ata },
+              { label: 'Revision', value: part.rev },
+              { label: 'Used in MSN', value: part.msn },
+              { label: 'Assigned Engineer', value: part.engineer },
+              { label: 'Last Modified', value: part.date },
+            ].map(({ label, value }) => (
+              <div key={label} className="flex items-start gap-3 px-4 py-3">
+                <span className="text-caption text-fg-secondary w-36 shrink-0 pt-0.5">{label}</span>
+                <span className="text-body text-fg-primary">{value}</span>
+              </div>
+            ))}
+          </div>
+
+          <div>
+            <h3 className="text-body font-medium mb-2">Related Work Orders</h3>
+            <div className="rounded-lg border border-divider divide-y divide-divider">
+              {['WO-2026-0611', 'WO-2026-0608'].map((wo) => (
+                <div key={wo} className="flex items-center justify-between px-4 py-2.5">
+                  <span className="font-mono text-caption">{wo}</span>
+                  <Chip label="In Progress" color="orange" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </SheetBody>
+        <SheetFooter>
+          <SheetClose asChild>
+            <Button variant="secondary">Close</Button>
+          </SheetClose>
+          <EditPartDialog part={part}>
+            <Button variant="primary" startIcon={Wrench}>Edit Part</Button>
+          </EditPartDialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  )
+}
+
+// ── List Item Row (click = Sheet panel) ──
+function ListItemRow({ part }: { part: PartRecord }) {
+  return (
+    <PartDetailPanel part={part}>
+      <div className="flex items-center gap-2 px-4 py-3 rounded-lg border border-divider bg-surface cursor-pointer hover:bg-surface-hover hover:shadow-sm transition-all">
+        <Info size={14} className="text-fg-tertiary shrink-0" />
+        <span className="text-body font-medium font-mono">{part.code}</span>
+        <span className="text-fg-tertiary text-body">—</span>
+        <span className="text-body text-fg-secondary flex-1 truncate">{part.desc}</span>
+        <ChevronRight size={14} className="text-fg-tertiary shrink-0" />
+      </div>
+    </PartDetailPanel>
+  )
+}
+
+// ── Stat Card with Dialog (second-level modal) ──
 type StatDialogContent = { title: string; body: ReactElement<any, any> }
 
 function StatCard({ title, count, subtitle, badge, dialog }: {
@@ -325,112 +502,6 @@ function StatCard({ title, count, subtitle, badge, dialog }: {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
-}
-
-// ── Simple table ──
-function SimpleTable({ heads, rows }: { heads: string[]; rows: ReactElement<any, any>[] }) {
-  return (
-    <div className="rounded-lg border border-divider overflow-hidden">
-      <table className="w-full text-body border-collapse">
-        <thead>
-          <tr className="bg-surface-secondary border-b border-divider">
-            {heads.map((h) => (
-              <th key={h} className="text-left px-3 py-2 text-caption text-fg-secondary font-medium whitespace-nowrap">{h}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>{rows}</tbody>
-      </table>
-    </div>
-  )
-}
-
-function Chip({ label, color }: { label: string; color: 'green' | 'orange' | 'gray' }) {
-  const cls = {
-    green: 'bg-green-50 text-green-700 border-green-200',
-    orange: 'bg-amber-50 text-amber-700 border-amber-200',
-    gray: 'bg-surface-secondary text-fg-secondary border-divider',
-  }[color]
-  return <span className={`inline-flex px-2 py-0.5 rounded-full text-caption font-medium border ${cls}`}>{label}</span>
-}
-
-// ── Edit Dialog ──
-function EditDialog({ code, desc, children }: { code: string; desc: string; children: ReactElement<any, any> }) {
-  return (
-    <Dialog>
-      <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Edit — {code}</DialogTitle>
-        </DialogHeader>
-        <DialogBody>
-          <div className="space-y-4">
-            <div className="flex flex-col gap-1">
-              <label className="text-caption text-fg-secondary font-medium">Part Number</label>
-              <input defaultValue={code} className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-caption text-fg-secondary font-medium">Description</label>
-              <input defaultValue={desc} className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-caption text-fg-secondary font-medium">ATA Chapter</label>
-              <select className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary">
-                <option>ATA 21 — Air Conditioning</option>
-                <option>ATA 27 — Flight Controls</option>
-                <option>ATA 32 — Landing Gear</option>
-                <option>ATA 49 — APU</option>
-                <option>ATA 53 — Fuselage</option>
-                <option>ATA 57 — Wings</option>
-              </select>
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-caption text-fg-secondary font-medium">Status</label>
-              <select className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary">
-                <option>Active</option>
-                <option>Pending Review</option>
-                <option>Inactive</option>
-                <option>Superseded</option>
-              </select>
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-caption text-fg-secondary font-medium">Assigned Engineer</label>
-              <select className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary">
-                <option>Jake Thompson</option>
-                <option>Sarah Lin</option>
-                <option>Mike Chen</option>
-                <option>— Unassigned —</option>
-              </select>
-            </div>
-          </div>
-        </DialogBody>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="secondary">Cancel</Button>
-          </DialogClose>
-          <DialogClose asChild>
-            <Button variant="primary" onClick={() => toast({ title: `Changes saved for ${code}`, variant: 'success' })}>
-              Save Changes
-            </Button>
-          </DialogClose>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-// ── List Item Row ──
-function ListItemRow({ code, desc }: { code: string; desc: string }) {
-  return (
-    <div className="flex items-center gap-2 px-4 py-3 rounded-lg border border-divider bg-surface">
-      <span className="text-body font-medium font-mono">{code}</span>
-      <span className="text-fg-tertiary text-body">—</span>
-      <span className="text-body text-fg-secondary flex-1 truncate">{desc}</span>
-      <EditDialog code={code} desc={desc}>
-        <Button variant="secondary" size="sm">Edit</Button>
-      </EditDialog>
-    </div>
   )
 }
 
@@ -530,8 +601,8 @@ function DashboardTab() {
           <Button variant="link" size="sm" onClick={() => toast({ title: 'Loading full assembly list...' })}>View more</Button>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <ListItemRow code="53-11-00-001" desc="Fuselage Fwd Section Assy" />
-          <ListItemRow code="57-10-00-001" desc="Wing Box Center Section" />
+          <ListItemRow part={{ code: '53-11-00-001', desc: 'Fuselage Fwd Section Assy', ata: 'ATA 53', rev: 'Rev.C', status: 'Active', msn: 'MSN-7834, MSN-7835', engineer: 'Jake Thompson', date: '2026-06-10' }} />
+          <ListItemRow part={{ code: '57-10-00-001', desc: 'Wing Box Center Section', ata: 'ATA 57', rev: 'Rev.B', status: 'Pending Review', msn: 'MSN-7834', engineer: 'Sarah Lin', date: '2026-06-09' }} />
         </div>
       </section>
 
@@ -542,7 +613,7 @@ function DashboardTab() {
         </div>
         <div className="grid grid-cols-2 gap-3">
           {RUNNING_PARTS.map((r, i) => (
-            <ListItemRow key={i} code={r.code} desc={r.desc} />
+            <ListItemRow key={i} part={r} />
           ))}
         </div>
       </section>
@@ -550,7 +621,7 @@ function DashboardTab() {
   )
 }
 
-// ── Parts Analysis Tab (was Recipe Parsing) ──
+// ── Parts Analysis Tab ──
 function PartsAnalysisTab() {
   return (
     <div className="space-y-4">
