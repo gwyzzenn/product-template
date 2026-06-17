@@ -56,33 +56,41 @@ import {
   Download,
   User,
   LogOut,
+  Plane,
 } from 'lucide-react'
 
-// ── Nav data ──
+// ── Aircraft: A321-200 MSN-7834 ──
+// ATA chapter-based part breakdown
+const AIRCRAFT_MSN = 'MSN-7834'
+const AIRCRAFT_TYPE = 'A321-200'
+
 const TOP_NAV = [{ id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard }] as const
-const BOM_NAV = [
-  { id: 'site-master', label: 'Site Master', icon: Server },
-  { id: 'bom-viewer', label: 'BOM Viewer', icon: List },
+
+const COMPONENTS_NAV = [
+  { id: 'fleet-registry', label: 'Fleet Registry', icon: Server },
+  { id: 'assembly-viewer', label: 'Assembly Viewer', icon: List },
   { id: 'configurator', label: 'Configurator', icon: Settings },
-  { id: 'alternative', label: 'Alternative', icon: Shuffle },
-  { id: 'mass-part-creation', label: 'Mass Part Creation', icon: Layers },
-] as const
-const LOT_OWNER_NAV = [
-  { id: 'tm6-lot', label: 'Interposer TM6 Config', icon: FileText },
-] as const
-const BASIC_INFO_NAV = [
-  { id: 'tm6-1', label: 'Interposer TM6 Configurations', icon: FileText },
-  { id: 'tm6-2', label: 'Interposer TM6 Configurations', icon: FileText },
+  { id: 'substitutes', label: 'Substitutes', icon: Shuffle },
+  { id: 'batch-entry', label: 'Batch Entry', icon: Layers },
 ] as const
 
-// ── Running Rule data ──
-const RUNNING_RULES = [
-  { code: 'ASGR100', desc: 'Assembly Run 100' },
-  { code: 'ASGR100', desc: 'Assembly Run 100' },
-  { code: 'ASGR200', desc: 'Assembly Run 200' },
-  { code: 'ASGR200', desc: 'Assembly Run 200' },
-  { code: 'ASGB200', desc: 'Assembly Block 200' },
-  { code: 'ASGB200', desc: 'Assembly Block 200' },
+const AIRCRAFT_OWNER_NAV = [
+  { id: 'owner-config', label: 'B-18351 Fleet Config', icon: FileText },
+] as const
+
+const AIRCRAFT_SPEC_NAV = [
+  { id: 'type-cert', label: 'A321-200 Type Certificate', icon: FileText },
+  { id: 'engine-config', label: 'CFM56-5B Engine Config', icon: FileText },
+] as const
+
+// ATA chapter part codes for A321-200
+const RUNNING_PARTS = [
+  { code: '32-10-11-001', desc: 'MLG Assembly — LH (ATA 32)' },
+  { code: '32-10-12-001', desc: 'MLG Assembly — RH (ATA 32)' },
+  { code: '27-10-00-001', desc: 'Aileron Assembly — LH (ATA 27)' },
+  { code: '27-10-00-002', desc: 'Aileron Assembly — RH (ATA 27)' },
+  { code: '49-00-00-001', desc: 'APU APS3200 Assembly (ATA 49)' },
+  { code: '21-20-00-001', desc: 'Air Cycle Machine Assembly (ATA 21)' },
 ] as const
 
 // ── AppSidebar ──
@@ -91,9 +99,9 @@ function AppSidebar({ activeId, onActiveChange }: { activeId: string; onActiveCh
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <div className="flex items-center gap-2 min-w-0 group-data-[collapsible=icon]:justify-center">
-          <Avatar alt="PDM" size={24} shape="square" color="blue" solid />
+          <Avatar alt="ACM" size={24} shape="square" color="blue" solid />
           <span className="text-body-lg font-semibold truncate group-data-[collapsible=icon]:hidden">
-            Product Master
+            Aircraft Master
           </span>
         </div>
       </SidebarHeader>
@@ -117,10 +125,10 @@ function AppSidebar({ activeId, onActiveChange }: { activeId: string; onActiveCh
         <SidebarSeparator />
 
         <SidebarGroup collapsible defaultOpen>
-          <SidebarGroupLabel>BOM</SidebarGroupLabel>
+          <SidebarGroupLabel>Aircraft Components</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {BOM_NAV.map(({ id, label, icon }) => (
+              {COMPONENTS_NAV.map(({ id, label, icon }) => (
                 <SidebarMenuItem key={id}>
                   <SidebarMenuButton id={id} startIcon={icon} tooltip={label}
                     isActive={activeId === id} onClick={() => onActiveChange(id)}>
@@ -135,10 +143,10 @@ function AppSidebar({ activeId, onActiveChange }: { activeId: string; onActiveCh
         <SidebarSeparator />
 
         <SidebarGroup collapsible>
-          <SidebarGroupLabel>Lot Owner</SidebarGroupLabel>
+          <SidebarGroupLabel>Aircraft Owner</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {LOT_OWNER_NAV.map(({ id, label, icon }) => (
+              {AIRCRAFT_OWNER_NAV.map(({ id, label, icon }) => (
                 <SidebarMenuItem key={id}>
                   <SidebarMenuButton id={id} startIcon={icon} tooltip={label}
                     isActive={activeId === id} onClick={() => onActiveChange(id)}>
@@ -153,10 +161,10 @@ function AppSidebar({ activeId, onActiveChange }: { activeId: string; onActiveCh
         <SidebarSeparator />
 
         <SidebarGroup collapsible>
-          <SidebarGroupLabel>Basic Information</SidebarGroupLabel>
+          <SidebarGroupLabel>Aircraft Spec</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {BASIC_INFO_NAV.map(({ id, label, icon }) => (
+              {AIRCRAFT_SPEC_NAV.map(({ id, label, icon }) => (
                 <SidebarMenuItem key={id}>
                   <SidebarMenuButton id={id} startIcon={icon} tooltip={label}
                     isActive={activeId === id} onClick={() => onActiveChange(id)}>
@@ -187,9 +195,9 @@ function AppSidebar({ activeId, onActiveChange }: { activeId: string; onActiveCh
 
 // ── Notification Dropdown ──
 const NOTIFICATIONS = [
-  { icon: '⚠️', title: 'Missing configuration detected', body: '5 parts in U337 have missing BOM configuration.', time: '2h ago' },
-  { icon: '📋', title: 'Submit reminder', body: '2 items in U337 are pending submission.', time: '5h ago' },
-  { icon: '✅', title: 'Recipe parse completed', body: 'RPJ-20260611-001: 12 rules extracted from ASGR100.', time: 'Yesterday' },
+  { icon: '⚠️', title: 'Missing part configuration', body: '5 parts in A321 MSN-7834 have missing configuration data.', time: '2h ago' },
+  { icon: '📋', title: 'Submit reminder', body: '2 part entries for MSN-7834 are pending engineering approval.', time: '5h ago' },
+  { icon: '✅', title: 'Parts analysis completed', body: 'PAJ-20260611-001: 12 rules extracted from 53-11-00-001.', time: 'Yesterday' },
 ] as const
 
 function NotificationMenu() {
@@ -237,7 +245,7 @@ function ProfileMenu() {
           <Avatar alt="Jake Thompson" size={36} color="blue" />
           <div>
             <div className="text-body font-medium">Jake Thompson</div>
-            <div className="text-caption text-fg-secondary">jake@tsmc.com</div>
+            <div className="text-caption text-fg-secondary">jake@airline.com</div>
           </div>
         </div>
         <DropdownMenuSeparator />
@@ -259,8 +267,8 @@ function TopHeader(_: { rightSlot?: ReactElement<any, any> }) {
         <div className="flex items-center gap-2 rounded-md border border-divider bg-surface px-3 h-9">
           <Search size={16} className="text-fg-tertiary shrink-0" />
           <input
-            defaultValue="TM5678"
-            placeholder="Search part, BOM, product..."
+            defaultValue="A321-200"
+            placeholder="Search part number, assembly, MSN..."
             className="flex-1 bg-transparent text-body text-fg-primary outline-none placeholder:text-fg-tertiary"
           />
         </div>
@@ -320,7 +328,7 @@ function StatCard({ title, count, subtitle, badge, dialog }: {
   )
 }
 
-// ── Simple table components ──
+// ── Simple table ──
 function SimpleTable({ heads, rows }: { heads: string[]; rows: ReactElement<any, any>[] }) {
   return (
     <div className="rounded-lg border border-divider overflow-hidden">
@@ -359,7 +367,7 @@ function EditDialog({ code, desc, children }: { code: string; desc: string; chil
         <DialogBody>
           <div className="space-y-4">
             <div className="flex flex-col gap-1">
-              <label className="text-caption text-fg-secondary font-medium">Part Code</label>
+              <label className="text-caption text-fg-secondary font-medium">Part Number</label>
               <input defaultValue={code} className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" />
             </div>
             <div className="flex flex-col gap-1">
@@ -367,16 +375,27 @@ function EditDialog({ code, desc, children }: { code: string; desc: string; chil
               <input defaultValue={desc} className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" />
             </div>
             <div className="flex flex-col gap-1">
+              <label className="text-caption text-fg-secondary font-medium">ATA Chapter</label>
+              <select className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary">
+                <option>ATA 21 — Air Conditioning</option>
+                <option>ATA 27 — Flight Controls</option>
+                <option>ATA 32 — Landing Gear</option>
+                <option>ATA 49 — APU</option>
+                <option>ATA 53 — Fuselage</option>
+                <option>ATA 57 — Wings</option>
+              </select>
+            </div>
+            <div className="flex flex-col gap-1">
               <label className="text-caption text-fg-secondary font-medium">Status</label>
               <select className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary">
                 <option>Active</option>
                 <option>Pending Review</option>
                 <option>Inactive</option>
-                <option>Deprecated</option>
+                <option>Superseded</option>
               </select>
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-caption text-fg-secondary font-medium">Assigned Reviewer</label>
+              <label className="text-caption text-fg-secondary font-medium">Assigned Engineer</label>
               <select className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary">
                 <option>Jake Thompson</option>
                 <option>Sarah Lin</option>
@@ -405,7 +424,7 @@ function EditDialog({ code, desc, children }: { code: string; desc: string; chil
 function ListItemRow({ code, desc }: { code: string; desc: string }) {
   return (
     <div className="flex items-center gap-2 px-4 py-3 rounded-lg border border-divider bg-surface">
-      <span className="text-body font-medium">{code}</span>
+      <span className="text-body font-medium font-mono">{code}</span>
       <span className="text-fg-tertiary text-body">—</span>
       <span className="text-body text-fg-secondary flex-1 truncate">{desc}</span>
       <EditDialog code={code} desc={desc}>
@@ -415,66 +434,73 @@ function ListItemRow({ code, desc }: { code: string; desc: string }) {
   )
 }
 
-// ── Dashboard Tab Content ──
+// ── Dashboard Tab ──
 function DashboardTab() {
   const waitDialog: StatDialogContent = {
-    title: 'Wait to Submit — 2 items',
+    title: 'Pending Approval — 2 Part Entries',
     body: (
       <SimpleTable
-        heads={['Part', 'Pending Since', 'Action']}
+        heads={['Part Number', 'Description', 'Submitted', 'Action']}
         rows={[
-          <tr key="r1" className="border-b border-divider last:border-0 hover:bg-surface-secondary">
-            <td className="px-3 py-2">ASGR100</td>
+          <tr key="w1" className="border-b border-divider last:border-0 hover:bg-surface-secondary">
+            <td className="px-3 py-2 font-mono text-caption">53-11-00-001</td>
+            <td className="px-3 py-2 text-fg-secondary">Fuselage Fwd Section Assy</td>
             <td className="px-3 py-2 text-fg-secondary">2026-06-10</td>
-            <td className="px-3 py-2"><Button variant="primary" size="sm" onClick={() => toast({ title: 'Submitting ASGR100...', variant: 'info' })}>Submit</Button></td>
+            <td className="px-3 py-2"><Button variant="primary" size="sm" onClick={() => toast({ title: 'Submitting 53-11-00-001...', variant: 'info' })}>Submit</Button></td>
           </tr>,
-          <tr key="r2" className="hover:bg-surface-secondary">
-            <td className="px-3 py-2">ASGB100</td>
+          <tr key="w2" className="hover:bg-surface-secondary">
+            <td className="px-3 py-2 font-mono text-caption">57-10-00-001</td>
+            <td className="px-3 py-2 text-fg-secondary">Wing Box Center Section</td>
             <td className="px-3 py-2 text-fg-secondary">2026-06-09</td>
-            <td className="px-3 py-2"><Button variant="primary" size="sm" onClick={() => toast({ title: 'Submitting ASGB100...', variant: 'info' })}>Submit</Button></td>
+            <td className="px-3 py-2"><Button variant="primary" size="sm" onClick={() => toast({ title: 'Submitting 57-10-00-001...', variant: 'info' })}>Submit</Button></td>
           </tr>,
         ]}
       />
     ),
   }
+
   const missingDialog: StatDialogContent = {
-    title: 'Missing Configuration — 5 items',
+    title: 'Missing Configuration — 5 Part Numbers',
     body: (
       <SimpleTable
-        heads={['Part', 'Missing Field', 'Action']}
+        heads={['Part Number', 'ATA Chapter', 'Missing Field', 'Action']}
         rows={[
-          ['ASGR100', 'TM6 Mapping'],
-          ['ASGB100', 'Recipe Ref'],
-          ['ASGR200', 'TM6 Mapping'],
-          ['TM6-SUB', 'Site Assignment'],
-          ['INTERP-V2', 'Version Lock'],
-        ].map(([part, field]) => (
-          <tr key={part} className="border-b border-divider last:border-0 hover:bg-surface-secondary">
-            <td className="px-3 py-2">{part}</td>
+          ['32-10-11-001', 'ATA 32', 'Overhaul Interval'],
+          ['32-10-12-001', 'ATA 32', 'Overhaul Interval'],
+          ['27-10-00-001', 'ATA 27', 'Supplier Code'],
+          ['49-00-00-001', 'ATA 49', 'Life Limit (hrs)'],
+          ['21-20-00-001', 'ATA 21', 'OEM Reference'],
+        ].map(([pn, ata, field]) => (
+          <tr key={pn} className="border-b border-divider last:border-0 hover:bg-surface-secondary">
+            <td className="px-3 py-2 font-mono text-caption">{pn}</td>
+            <td className="px-3 py-2 text-fg-secondary">{ata}</td>
             <td className="px-3 py-2 text-destructive">{field}</td>
-            <td className="px-3 py-2"><Button variant="secondary" size="sm" onClick={() => toast({ title: `Editing ${part}...`, variant: 'info' })}>Fix</Button></td>
+            <td className="px-3 py-2"><Button variant="secondary" size="sm" onClick={() => toast({ title: `Editing ${pn}...`, variant: 'info' })}>Fix</Button></td>
           </tr>
         ))}
       />
     ),
   }
+
   const prodDialog: StatDialogContent = {
-    title: 'In Production — 2 items',
+    title: 'In Service — 2 Aircraft',
     body: (
       <>
-        <p className="text-body text-fg-secondary mb-4">Items in active production. Changes require a CCB review.</p>
+        <p className="text-body text-fg-secondary mb-4">Aircraft currently in active service. Configuration changes require an Engineering Order (EO) review.</p>
         <SimpleTable
-          heads={['Part', 'Lot', 'Started', 'Status']}
+          heads={['MSN', 'Reg.', 'Work Order', 'In Service Since', 'Status']}
           rows={[
             <tr key="p1" className="border-b border-divider hover:bg-surface-secondary">
-              <td className="px-3 py-2 font-medium">ASGR100</td>
-              <td className="px-3 py-2 font-mono text-caption">LOT-2026-0611</td>
+              <td className="px-3 py-2 font-medium font-mono">MSN-7834</td>
+              <td className="px-3 py-2">B-18351</td>
+              <td className="px-3 py-2 font-mono text-caption">WO-2026-0611</td>
               <td className="px-3 py-2 text-fg-secondary">2026-06-11</td>
-              <td className="px-3 py-2"><Chip label="Warning" color="orange" /></td>
+              <td className="px-3 py-2"><Chip label="EO Pending" color="orange" /></td>
             </tr>,
             <tr key="p2" className="hover:bg-surface-secondary">
-              <td className="px-3 py-2 font-medium">ASGB100</td>
-              <td className="px-3 py-2 font-mono text-caption">LOT-2026-0608</td>
+              <td className="px-3 py-2 font-medium font-mono">MSN-7835</td>
+              <td className="px-3 py-2">B-18352</td>
+              <td className="px-3 py-2 font-mono text-caption">WO-2026-0608</td>
               <td className="px-3 py-2 text-fg-secondary">2026-06-08</td>
               <td className="px-3 py-2"><Chip label="On Track" color="green" /></td>
             </tr>,
@@ -489,33 +515,33 @@ function DashboardTab() {
       <section>
         <h2 className="text-body-lg font-semibold mb-3">Summary</h2>
         <div className="flex gap-4">
-          <StatCard title="Wait to submit" count={2} subtitle="need to handle" dialog={waitDialog} />
+          <StatCard title="Pending approval" count={2} subtitle="need to submit" dialog={waitDialog} />
           <StatCard title="Missing configuration" count={5} subtitle="need to handle" dialog={missingDialog} />
           <StatCard
-            title="In Production" count={2} subtitle="" dialog={prodDialog}
-            badge={<span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-caption font-medium border border-amber-200">Pending</span>}
+            title="In Service" count={2} subtitle="" dialog={prodDialog}
+            badge={<span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-caption font-medium border border-amber-200">EO Pending</span>}
           />
         </div>
       </section>
 
       <section>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-body-lg font-semibold">Product list</h2>
-          <Button variant="link" size="sm" onClick={() => toast({ title: 'Loading full product list...' })}>View more</Button>
+          <h2 className="text-body-lg font-semibold">Primary Assemblies</h2>
+          <Button variant="link" size="sm" onClick={() => toast({ title: 'Loading full assembly list...' })}>View more</Button>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <ListItemRow code="ASGR100" desc="Assembly Run 100" />
-          <ListItemRow code="ASGB100" desc="Assembly Block 100" />
+          <ListItemRow code="53-11-00-001" desc="Fuselage Fwd Section Assy" />
+          <ListItemRow code="57-10-00-001" desc="Wing Box Center Section" />
         </div>
       </section>
 
       <section>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-body-lg font-semibold">Running Rule</h2>
-          <Button variant="link" size="sm" onClick={() => toast({ title: 'Loading all running rules...' })}>View more</Button>
+          <h2 className="text-body-lg font-semibold">Active Part Numbers</h2>
+          <Button variant="link" size="sm" onClick={() => toast({ title: 'Loading all active parts...' })}>View more</Button>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          {RUNNING_RULES.map((r, i) => (
+          {RUNNING_PARTS.map((r, i) => (
             <ListItemRow key={i} code={r.code} desc={r.desc} />
           ))}
         </div>
@@ -524,26 +550,27 @@ function DashboardTab() {
   )
 }
 
-// ── Recipe Parsing Tab ──
-function RecipeTab() {
+// ── Parts Analysis Tab (was Recipe Parsing) ──
+function PartsAnalysisTab() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-body-lg font-semibold">Recipe Parsing</h2>
-        <Button variant="primary" size="sm" onClick={() => toast({ title: 'New recipe parse job started for U337', variant: 'success' })}>
-          + New Parse Job
+        <h2 className="text-body-lg font-semibold">Parts Analysis</h2>
+        <Button variant="primary" size="sm" onClick={() => toast({ title: `New analysis job started for ${AIRCRAFT_TYPE} ${AIRCRAFT_MSN}`, variant: 'success' })}>
+          + New Analysis Job
         </Button>
       </div>
       <SimpleTable
-        heads={['Job ID', 'Part', 'Started', 'Status', 'Result', 'Action']}
+        heads={['Job ID', 'Part Number', 'ATA', 'Started', 'Status', 'Result', 'Action']}
         rows={[
-          { id: 'RPJ-20260611-001', part: 'ASGR100', date: '2026-06-11 09:32', status: <Chip label="Completed" color="green" />, result: '12 rules extracted' },
-          { id: 'RPJ-20260610-003', part: 'ASGB100', date: '2026-06-10 14:15', status: <Chip label="Warning" color="orange" />, result: '8 rules, 2 conflicts' },
-          { id: 'RPJ-20260609-007', part: 'ASGR100', date: '2026-06-09 16:48', status: <Chip label="Archived" color="gray" />, result: '10 rules extracted' },
+          { id: 'PAJ-20260611-001', pn: '53-11-00-001', ata: 'ATA 53', date: '2026-06-11 09:32', status: <Chip label="Completed" color="green" />, result: '12 rules applied' },
+          { id: 'PAJ-20260610-003', pn: '57-10-00-001', ata: 'ATA 57', date: '2026-06-10 14:15', status: <Chip label="Warning" color="orange" />, result: '8 rules, 2 conflicts' },
+          { id: 'PAJ-20260609-007', pn: '32-10-11-001', ata: 'ATA 32', date: '2026-06-09 16:48', status: <Chip label="Archived" color="gray" />, result: '10 rules applied' },
         ].map((row) => (
           <tr key={row.id} className="border-b border-divider last:border-0 hover:bg-surface-secondary">
             <td className="px-3 py-2 font-mono text-caption">{row.id}</td>
-            <td className="px-3 py-2">{row.part}</td>
+            <td className="px-3 py-2 font-mono text-caption">{row.pn}</td>
+            <td className="px-3 py-2 text-fg-secondary">{row.ata}</td>
             <td className="px-3 py-2 text-fg-secondary text-caption">{row.date}</td>
             <td className="px-3 py-2">{row.status}</td>
             <td className="px-3 py-2 text-fg-secondary">{row.result}</td>
@@ -562,23 +589,25 @@ function TraceabilityTab() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-body-lg font-semibold">Traceability — U337</h2>
+        <h2 className="text-body-lg font-semibold">Traceability — {AIRCRAFT_TYPE} {AIRCRAFT_MSN}</h2>
         <Button variant="secondary" size="sm" startIcon={Download} onClick={() => toast({ title: 'Exporting traceability report...' })}>
           Export
         </Button>
       </div>
       <SimpleTable
-        heads={['Component', 'Version', 'Used In', 'Changed By', 'Date', 'Status']}
+        heads={['Part Number', 'Description', 'ATA', 'Rev.', 'Used In MSN', 'Changed By', 'Date', 'Status']}
         rows={[
-          { comp: 'ASGR100', ver: 'v2.3.1', usedIn: 'U337, U338', by: 'Jake T.', date: '2026-06-10', status: <Chip label="Active" color="green" /> },
-          { comp: 'ASGB100', ver: 'v1.8.0', usedIn: 'U337', by: 'Sarah L.', date: '2026-06-08', status: <Chip label="Review" color="orange" /> },
-          { comp: 'TM6-CORE', ver: 'v4.0.2', usedIn: 'U337, U340, U341', by: 'System', date: '2026-06-01', status: <Chip label="Active" color="green" /> },
-          { comp: 'INTERP-V3', ver: 'v3.1.0', usedIn: 'U337', by: 'Mike C.', date: '2026-05-28', status: <Chip label="Deprecated" color="gray" /> },
+          { pn: '53-11-00-001', desc: 'Fuselage Fwd Section', ata: 'ATA 53', rev: 'Rev.C', msn: 'MSN-7834, MSN-7835', by: 'Jake T.', date: '2026-06-10', status: <Chip label="Active" color="green" /> },
+          { pn: '57-10-00-001', desc: 'Wing Box Center', ata: 'ATA 57', rev: 'Rev.B', msn: 'MSN-7834', by: 'Sarah L.', date: '2026-06-08', status: <Chip label="Review" color="orange" /> },
+          { pn: '32-10-11-001', desc: 'MLG Assy — LH', ata: 'ATA 32', rev: 'Rev.D', msn: 'MSN-7834, MSN-7836, MSN-7837', by: 'System', date: '2026-06-01', status: <Chip label="Active" color="green" /> },
+          { pn: '49-00-00-001', desc: 'APU APS3200 Assy', ata: 'ATA 49', rev: 'Rev.A', msn: 'MSN-7834', by: 'Mike C.', date: '2026-05-28', status: <Chip label="Superseded" color="gray" /> },
         ].map((row) => (
-          <tr key={row.comp} className="border-b border-divider last:border-0 hover:bg-surface-secondary">
-            <td className="px-3 py-2 font-medium">{row.comp}</td>
-            <td className="px-3 py-2 text-fg-secondary">{row.ver}</td>
-            <td className="px-3 py-2 text-fg-secondary">{row.usedIn}</td>
+          <tr key={row.pn} className="border-b border-divider last:border-0 hover:bg-surface-secondary">
+            <td className="px-3 py-2 font-medium font-mono text-caption">{row.pn}</td>
+            <td className="px-3 py-2 text-fg-secondary">{row.desc}</td>
+            <td className="px-3 py-2 text-fg-secondary">{row.ata}</td>
+            <td className="px-3 py-2 text-fg-secondary">{row.rev}</td>
+            <td className="px-3 py-2 text-fg-secondary text-caption">{row.msn}</td>
             <td className="px-3 py-2 text-fg-secondary">{row.by}</td>
             <td className="px-3 py-2 text-fg-secondary">{row.date}</td>
             <td className="px-3 py-2">{row.status}</td>
@@ -591,11 +620,11 @@ function TraceabilityTab() {
 
 // ── Rule Settings Tab ──
 const RULES = [
-  { label: 'Auto-assign on submit', desc: 'Automatically assign reviewer when part is submitted for approval.', defaultOn: true },
-  { label: 'Validate on configuration change', desc: 'Run validation rules automatically when BOM configuration changes.', defaultOn: true },
-  { label: 'Block production on missing config', desc: 'Prevent production release when required BOM fields are incomplete.', defaultOn: false },
-  { label: 'Notify on recipe conflict', desc: 'Send notification when a recipe parsing job detects rule conflicts.', defaultOn: true },
-  { label: 'Enforce TM6 interposer constraints', desc: 'Apply Interposer TM6 compatibility rules across all running rule evaluations.', defaultOn: true },
+  { label: 'Auto-assign on submission', desc: 'Automatically assign an engineer when a part entry is submitted for approval.', defaultOn: true },
+  { label: 'Validate on configuration change', desc: 'Run airworthiness validation rules automatically when part configuration changes.', defaultOn: true },
+  { label: 'Block release on missing config', desc: 'Prevent airworthiness release when required part fields are incomplete.', defaultOn: false },
+  { label: 'Notify on analysis conflict', desc: 'Send notification when a parts analysis job detects rule conflicts.', defaultOn: true },
+  { label: 'Enforce ATA chapter compliance', desc: 'Apply ATA chapter-specific compatibility rules across all active part evaluations.', defaultOn: true },
 ] as const
 
 function RuleSettingsTab() {
@@ -630,17 +659,23 @@ function ConfiguratorPage() {
   return (
     <div className="px-6 py-5 space-y-5">
       <div className="flex items-center gap-1 text-body text-fg-secondary">
-        <span className="hover:text-fg-primary cursor-pointer">Product Master</span>
+        <span className="hover:text-fg-primary cursor-pointer">Aircraft Master</span>
         <span className="mx-1">/</span>
         <span className="hover:text-fg-primary cursor-pointer">Configurator</span>
         <span className="mx-1">/</span>
       </div>
 
       <div className="flex items-center justify-between">
-        <h1 className="text-h3 font-semibold">U337</h1>
+        <div className="flex items-center gap-3">
+          <Plane size={22} className="text-fg-secondary" />
+          <div>
+            <h1 className="text-h3 font-semibold">{AIRCRAFT_TYPE}</h1>
+            <p className="text-caption text-fg-secondary">{AIRCRAFT_MSN} &middot; Reg. B-18351 &middot; CFM56-5B</p>
+          </div>
+        </div>
         <Button variant="secondary" size="md" startIcon={Layers}
-          onClick={() => toast({ title: 'Mass Part Creation dialog opened' })}>
-          Mass Part Creation
+          onClick={() => toast({ title: 'Batch part entry dialog opened' })}>
+          Batch Entry
         </Button>
       </div>
 
@@ -649,12 +684,12 @@ function ConfiguratorPage() {
           <TabsTrigger value="dashboard" badge={<Badge count={99} max={99} variant="high" />}>
             Dashboard
           </TabsTrigger>
-          <TabsTrigger value="recipe-parsing">Recipe Parsing</TabsTrigger>
+          <TabsTrigger value="parts-analysis">Parts Analysis</TabsTrigger>
           <TabsTrigger value="traceability">Traceability</TabsTrigger>
           <TabsTrigger value="rule-settings">Rule Settings</TabsTrigger>
         </TabsList>
         <TabsContent value="dashboard" className="mt-6"><DashboardTab /></TabsContent>
-        <TabsContent value="recipe-parsing" className="mt-6"><RecipeTab /></TabsContent>
+        <TabsContent value="parts-analysis" className="mt-6"><PartsAnalysisTab /></TabsContent>
         <TabsContent value="traceability" className="mt-6"><TraceabilityTab /></TabsContent>
         <TabsContent value="rule-settings" className="mt-6"><RuleSettingsTab /></TabsContent>
       </Tabs>
