@@ -67,6 +67,8 @@ import {
   Plane,
   Wrench,
   Info,
+  X,
+  ChevronLeft,
 } from 'lucide-react'
 
 // ── Aircraft: A321-200 MSN-7834 ──
@@ -729,27 +731,26 @@ function RuleSettingsTab() {
   const toggleCheck = (id: string) =>
     setCheckedIds((prev) => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s })
 
-  const FORM_FIELDS: { label: string; options: string[]; value: string }[] = selected ? [
-    { label: '*ATA Chapter', options: ['ATA21 — Air Conditioning', 'ATA27 — Flight Controls', 'ATA32 — Landing Gear', 'ATA49 — APU', 'ATA53 — Fuselage', 'ATA57 — Wings'], value: selected.ataChapter },
-    { label: '*Level', options: ['L1', 'L2', 'L3'], value: selected.level },
-    { label: '*Config By', options: ['JAKE-T', 'SARAH-L', 'MIKE-C', 'SYSTEM'], value: selected.configBy },
-    { label: '*Config Type', options: ['LSI', 'MLG', 'AIL', 'APU', 'ACM'], value: selected.configType },
-    { label: '*Spec Item', options: ['FWD-SECT', 'WB-CTR', 'MLG-LH', 'MLG-RH', 'AIL-LH', 'AIL-RH'], value: selected.specItem },
-    { label: '*Spec Value', options: ['REV.A-APPROVED', 'REV.B-REVIEW', 'REV.B-PENDING', 'REV.C-APPROVED', 'REV.D-APPROVED'], value: selected.specValue.split(',')[0] },
+  const FORM_FIELDS: { label: string; type: 'select' | 'input'; options?: string[]; value: string }[] = selected ? [
+    { label: '*ATA Chapter', type: 'select', options: ['ATA21 — Air Conditioning', 'ATA27 — Flight Controls', 'ATA32 — Landing Gear', 'ATA49 — APU', 'ATA53 — Fuselage', 'ATA57 — Wings'], value: selected.ataChapter },
+    { label: '*Level', type: 'select', options: ['L1', 'L2', 'L3'], value: selected.level },
+    { label: '*Config By', type: 'select', options: ['JAKE-T', 'SARAH-L', 'MIKE-C', 'SYSTEM'], value: selected.configBy },
+    { label: '*Config Type', type: 'select', options: ['LSI', 'MLG', 'AIL', 'APU', 'ACM'], value: selected.configType },
+    { label: '*Spec Item', type: 'select', options: ['FWD-SECT', 'WB-CTR', 'MLG-LH', 'MLG-RH', 'AIL-LH', 'AIL-RH'], value: selected.specItem },
+    { label: '*Spec Value', type: 'input', value: selected.specValue.split(',')[0] },
   ] : []
 
   return (
-    // fill height: calc from approximate chrome+breadcrumb+tabs = ~260px; min 500px
-    <div className="flex flex-col" style={{ height: 'calc(100svh - 260px)', minHeight: '500px' }}>
+    <div className="flex flex-col border border-divider" style={{ height: 'calc(100vh - 256px)', minHeight: '500px' }}>
 
-      {/* ── Filter bar ── */}
-      <div className="flex items-end gap-3 px-4 py-3 border border-divider border-b-0 bg-surface-secondary rounded-t-lg">
+      {/* ── Filter bar: white bg matching table, label-above pattern, icon-only search ── */}
+      <div className="flex items-end gap-3 px-4 pt-3 pb-0 bg-surface border-b border-divider shrink-0">
         {[
           { label: 'ATA Chapter', value: ataFilter, onChange: setAtaFilter, placeholder: 'e.g. ATA32' },
           { label: 'Part Number', value: pnFilter, onChange: setPnFilter, placeholder: 'e.g. 32-10-11' },
           { label: 'Config Type', value: typeFilter, onChange: setTypeFilter, placeholder: 'e.g. LSI' },
         ].map(({ label, value, onChange, placeholder }) => (
-          <div key={label} className="flex flex-col gap-1 flex-1">
+          <div key={label} className="flex flex-col gap-1 flex-1 pb-3">
             <label className="text-caption text-fg-secondary font-medium">{label}</label>
             <input
               value={value}
@@ -759,25 +760,29 @@ function RuleSettingsTab() {
             />
           </div>
         ))}
-        <button
-          onClick={() => { setAtaFilter(''); setPnFilter(''); setTypeFilter('') }}
-          className="h-8 px-4 rounded-md bg-primary text-surface text-body font-medium hover:bg-primary/90 transition-colors shrink-0"
-        >
-          Search
-        </button>
+        {/* icon-only search button (lucide Search icon) */}
+        <div className="pb-3 shrink-0">
+          <button
+            onClick={() => { setAtaFilter(''); setPnFilter(''); setTypeFilter('') }}
+            className="h-8 w-8 flex items-center justify-center rounded-md bg-primary text-surface hover:bg-primary/90 transition-colors"
+            title="Search"
+          >
+            <Search size={14} />
+          </button>
+        </div>
       </div>
 
-      {/* ── Main split: table + right panel (flex-1 fills remaining height) ── */}
-      <div className="flex flex-1 min-h-0 border border-divider">
+      {/* ── Main split: table left + right panel — flex-1 fills remaining height ── */}
+      <div className="flex flex-1 min-h-0">
 
         {/* ── Table column ── */}
         <div className="flex-1 flex flex-col min-w-0">
-          {/* Table scrollable body */}
+          {/* Scrollable table body */}
           <div className="flex-1 overflow-y-auto overflow-x-auto">
             <table className="w-full text-body border-collapse">
               <thead>
                 <tr className="bg-surface-secondary border-b border-divider sticky top-0 z-10">
-                  <th className="w-10 px-3 py-3 text-left">
+                  <th className="w-10 px-3 py-3">
                     <input type="checkbox" checked={allChecked} onChange={toggleAll}
                       className="w-4 h-4 rounded border-divider accent-primary cursor-pointer" />
                   </th>
@@ -804,16 +809,14 @@ function RuleSettingsTab() {
                     <td className="px-3 py-3 font-mono text-caption">{row.specItem}</td>
                     <td className="px-3 py-3 text-fg-secondary text-caption max-w-[200px] truncate">{row.specValue}</td>
                     <td className="px-3 py-3 text-fg-secondary text-caption whitespace-nowrap">{row.lastModified}</td>
-                    <td className="px-3 py-3">
+                    <td className="px-3 py-2 text-center">
+                      {/* lucide Info icon (from gwyzzenn/lucide source) */}
                       <button
                         onClick={() => setSelected(selected?.id === row.id ? null : row)}
                         className={`p-1.5 rounded-md hover:bg-surface-hover transition-colors ${selected?.id === row.id ? 'text-primary' : 'text-fg-tertiary hover:text-fg-secondary'}`}
                         title="View / edit"
                       >
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                          <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.4"/>
-                          <path d="M8 7v5M8 5.5v.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-                        </svg>
+                        <Info size={15} />
                       </button>
                     </td>
                   </tr>
@@ -829,18 +832,24 @@ function RuleSettingsTab() {
             </table>
           </div>
 
-          {/* Pagination — pinned at bottom of table column, full width, no side padding on divider */}
-          <div className="flex items-center justify-between px-4 py-2 border-t border-divider bg-surface shrink-0">
-            <span className="text-caption text-fg-secondary">1 – {filtered.length} of {RULE_RECORDS.length}</span>
-            <div className="flex items-center gap-1">
+          {/* ── Pagination pinned at bottom — border-t is naturally full-width (no px on container) ── */}
+          <div className="shrink-0 border-t border-divider bg-surface flex items-center px-4 py-2 gap-4">
+            <span className="text-caption text-fg-secondary flex-1">1 – {filtered.length} of {RULE_RECORDS.length}</span>
+            <div className="flex items-center gap-0.5">
               {[1, 2, 3].map((p) => (
-                <button key={p} className={`w-7 h-7 rounded text-caption font-medium transition-colors ${p === 1 ? 'bg-primary text-surface' : 'hover:bg-surface-hover text-fg-secondary'}`}>{p}</button>
+                <button
+                  key={p}
+                  className={`w-7 h-7 rounded text-caption font-medium transition-colors ${p === 1 ? 'bg-primary text-surface' : 'hover:bg-surface-hover text-fg-secondary'}`}
+                >
+                  {p}
+                </button>
               ))}
+              {/* lucide ChevronLeft / ChevronRight for pagination arrows */}
               <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-hover text-fg-secondary">
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7.5 9L4.5 6l3-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
+                <ChevronLeft size={14} />
               </button>
               <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-hover text-fg-secondary">
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 3L7.5 6l-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
+                <ChevronRight size={14} />
               </button>
             </div>
             <div className="flex items-center gap-2">
@@ -852,51 +861,63 @@ function RuleSettingsTab() {
           </div>
         </div>
 
-        {/* ── Right edit panel (flush, no border-radius) ── */}
+        {/* ── Right edit panel ── */}
         {selected && (
-          <div className="w-[360px] shrink-0 border-l border-divider flex flex-col bg-surface">
-            {/* Panel header — bottom divider flush edge-to-edge */}
-            <div className="px-4 py-4 border-b border-divider shrink-0 flex items-start justify-between">
+          <div className="w-[320px] shrink-0 border-l border-divider flex flex-col bg-surface">
+
+            {/* Panel header — border-b spans full panel width (no px on the border element itself) */}
+            <div className="shrink-0 border-b border-divider flex items-start justify-between px-4 py-4">
               <div>
                 <div className="text-caption text-fg-secondary">Part Number</div>
                 <div className="text-body-lg font-semibold font-mono mt-0.5">{selected.partNumber}</div>
               </div>
-              <button onClick={() => setSelected(null)} className="p-1 rounded hover:bg-surface-hover text-fg-tertiary">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
+              {/* lucide X icon for close */}
+              <button onClick={() => setSelected(null)} className="p-1 rounded hover:bg-surface-hover text-fg-tertiary mt-0.5">
+                <X size={16} />
               </button>
             </div>
 
-            {/* Form body — scrollable; dividers between fields use -mx-4 to be flush */}
-            <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col">
-              {FORM_FIELDS.map(({ label, options, value }, idx) => (
+            {/* Form body — NO horizontal padding on this container so dividers are naturally full-width */}
+            <div className="flex-1 overflow-y-auto flex flex-col">
+              {FORM_FIELDS.map(({ label, type, options, value }, idx) => (
                 <div key={label}>
-                  <div className="py-3 flex flex-col gap-1">
+                  {/* Field content: px-4 only inside the field block, NOT on the container */}
+                  <div className="px-4 py-3 flex flex-col gap-1.5">
                     <label className="text-caption text-fg-secondary font-medium">{label}</label>
-                    <select
-                      defaultValue={value}
-                      className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary"
-                    >
-                      {options.map((o) => <option key={o}>{o}</option>)}
-                    </select>
+                    {type === 'select' ? (
+                      <select
+                        defaultValue={value}
+                        className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary"
+                      >
+                        {(options ?? []).map((o) => <option key={o}>{o}</option>)}
+                      </select>
+                    ) : (
+                      <input
+                        defaultValue={value}
+                        className="h-9 px-3 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary"
+                      />
+                    )}
                   </div>
-                  {/* Edge-to-edge divider between fields — -mx-4 cancels the px-4 parent padding */}
+                  {/* Divider between fields: no mx — naturally fills 100% of parent width */}
                   {idx < FORM_FIELDS.length - 1 && (
-                    <div className="-mx-4 border-t border-divider" />
+                    <div className="border-t border-divider" />
                   )}
                 </div>
               ))}
-              <button
-                onClick={() => toast({ title: `Rule record ${selected.partNumber} deleted`, variant: 'error' })}
-                className="text-left text-destructive text-body font-medium hover:underline mt-4 mb-2"
-              >
-                Delete
-              </button>
+
+              {/* Delete link */}
+              <div className="px-4 py-4">
+                <button
+                  onClick={() => toast({ title: `Rule record ${selected.partNumber} deleted`, variant: 'error' })}
+                  className="text-destructive text-body font-medium hover:underline"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
 
-            {/* Footer — top divider flush edge-to-edge */}
-            <div className="px-4 py-3 border-t border-divider shrink-0 flex items-center justify-end gap-2">
+            {/* Footer — border-t spans full panel width */}
+            <div className="shrink-0 border-t border-divider flex items-center justify-end gap-2 px-4 py-3">
               <Button variant="secondary" onClick={() => setSelected(null)}>Discard</Button>
               <Button variant="primary" onClick={() => toast({ title: `Rule config for ${selected.partNumber} submitted`, variant: 'success' })}>
                 Submit Change
