@@ -988,7 +988,7 @@ function BatchEntryPage({ onBack }: { onBack: () => void }) {
   const toggleFilterAta = (ata: string) => setFilterAta((prev) => { const s = new Set(prev); s.has(ata) ? s.delete(ata) : s.add(ata); return s })
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col" style={{ height: '100%' }}>
       {/* ── Page header ── */}
       <div className="shrink-0 flex items-center justify-between px-6 py-4 border-b border-divider bg-surface">
         <div className="flex items-center gap-3">
@@ -1326,17 +1326,15 @@ export default function App() {
   return (
     <TooltipProvider delayDuration={500} skipDelayDuration={300}>
       <SidebarProvider activeId={activeId} onActiveChange={setActiveId}>
-        {showBatchEntry ? (
-          <BatchEntryPage onBack={() => setShowBatchEntry(false)} />
-        ) : (
-          <AppShell
-            layout="primary-sidebar"
-            sidebar={<AppSidebar activeId={activeId} onActiveChange={setActiveId} />}
-            header={<TopHeader />}
-          >
-            <ConfiguratorPage onBatchEntry={() => setShowBatchEntry(true)} />
-          </AppShell>
-        )}
+        <AppShell
+          layout="primary-sidebar"
+          sidebar={<AppSidebar activeId={activeId} onActiveChange={setActiveId} />}
+          header={<TopHeader />}
+        >
+          {showBatchEntry
+            ? <BatchEntryPage onBack={() => setShowBatchEntry(false)} />
+            : <ConfiguratorPage onBatchEntry={() => setShowBatchEntry(true)} />}
+        </AppShell>
       </SidebarProvider>
       <Toaster />
     </TooltipProvider>
