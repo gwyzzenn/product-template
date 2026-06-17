@@ -930,8 +930,354 @@ function RuleSettingsTab() {
   )
 }
 
+
+// ── A321(neo) Batch Entry / Mass Part Creation ──
+type BatchPart = {
+  id: string
+  serial: string
+  msn: string
+  manufacturer: string
+  component: string
+  airworthiness: string
+  ataPart: string
+  ataChapter: string
+  expandable?: boolean
+}
+
+const BATCH_PARTS: BatchPart[] = [
+  { id: '1', serial: 'A321NEO-53-FWD-SN001-ATA53-REV.C-CFM-LEAP1A', msn: 'MSN-7834', manufacturer: 'AIRBUS', component: 'Fuselage Fwd Section', airworthiness: 'Active', ataPart: '53-11-00-001', ataChapter: 'ATA53', expandable: true },
+  { id: '2', serial: 'A321NEO-57-WB-SN002-ATA57-REV.B-AIRBUS-CTR', msn: 'MSN-7834', manufacturer: 'AIRBUS', component: 'Wing Box Center Section', airworthiness: 'Active', ataPart: '57-10-00-001', ataChapter: 'ATA57', expandable: true },
+  { id: '3', serial: 'A321NEO-32-MLG-SN003-ATA32-REV.D-SAFRAN-LH', msn: 'MSN-7835', manufacturer: 'SAFRAN', component: 'MLG Assembly — LH', airworthiness: 'Active', ataPart: '32-10-11-001', ataChapter: 'ATA32' },
+  { id: '4', serial: 'A321NEO-32-MLG-SN004-ATA32-REV.D-SAFRAN-RH', msn: 'MSN-7835', manufacturer: 'SAFRAN', component: 'MLG Assembly — RH', airworthiness: 'Active', ataPart: '32-10-12-001', ataChapter: 'ATA32' },
+  { id: '5', serial: 'A321NEO-27-AIL-SN005-ATA27-REV.B-AIRBUS-LH', msn: 'MSN-7836', manufacturer: 'AIRBUS', component: 'Aileron Assembly — LH', airworthiness: 'Active', ataPart: '27-10-00-001', ataChapter: 'ATA27', expandable: true },
+  { id: '6', serial: 'A321NEO-27-AIL-SN006-ATA27-REV.B-AIRBUS-RH', msn: 'MSN-7836', manufacturer: 'AIRBUS', component: 'Aileron Assembly — RH', airworthiness: 'Active', ataPart: '27-10-00-002', ataChapter: 'ATA27' },
+  { id: '7', serial: 'A321NEO-49-APU-SN007-ATA49-REV.A-HONEYWELL-131', msn: 'MSN-7837', manufacturer: 'HONEYWELL', component: 'APU APS3200 Assembly', airworthiness: 'Superseded', ataPart: '49-00-00-001', ataChapter: 'ATA49' },
+  { id: '8', serial: 'A321NEO-21-ACM-SN008-ATA21-REV.C-HONEYWELL-TU', msn: 'MSN-7837', manufacturer: 'HONEYWELL', component: 'Air Cycle Machine Assembly', airworthiness: 'Active', ataPart: '21-20-00-001', ataChapter: 'ATA21' },
+  { id: '9', serial: 'A321NEO-28-FUEL-SN009-ATA28-REV.A-AIRBUS-CTR', msn: 'MSN-7834', manufacturer: 'AIRBUS', component: 'Fuel Tank Center Section', airworthiness: 'Active', ataPart: '28-20-00-001', ataChapter: 'ATA28' },
+  { id: '10', serial: 'A321NEO-36-BLEED-SN010-ATA36-REV.B-CFM-HP', msn: 'MSN-7835', manufacturer: 'CFM', component: 'Bleed Air High-Pressure Valve', airworthiness: 'Active', ataPart: '36-11-00-001', ataChapter: 'ATA36', expandable: true },
+]
+
+function BatchEntryPage({ onBack }: { onBack: () => void }) {
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+  const [ataFilter, setAtaFilter] = useState('')
+  const [msnFilter, setMsnFilter] = useState('')
+  const [mfrFilter, setMfrFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState<string[]>(['Active'])
+  const [filterTab, setFilterTab] = useState<'WF' | 'BP' | 'AS'>('BP')
+  const [filterKeyword, setFilterKeyword] = useState('')
+  const [showFilter, setShowFilter] = useState(true)
+  const [filterAta, setFilterAta] = useState<Set<string>>(new Set(['ATA53', 'ATA57', 'ATA32']))
+  const [filterStatus, setFilterStatus] = useState<Set<string>>(new Set(['Active']))
+
+  const filtered = BATCH_PARTS.filter((p) => {
+    if (ataFilter && !p.ataChapter.toLowerCase().includes(ataFilter.toLowerCase())) return false
+    if (msnFilter && !p.msn.toLowerCase().includes(msnFilter.toLowerCase())) return false
+    if (mfrFilter && !p.manufacturer.toLowerCase().includes(mfrFilter.toLowerCase())) return false
+    if (statusFilter.length > 0 && !statusFilter.includes(p.airworthiness)) return false
+    if (filterKeyword && !p.serial.toLowerCase().includes(filterKeyword.toLowerCase()) && !p.component.toLowerCase().includes(filterKeyword.toLowerCase())) return false
+    if (filterAta.size > 0 && !filterAta.has(p.ataChapter)) return false
+    return true
+  })
+
+  const allChecked = filtered.length > 0 && filtered.every((p) => selectedIds.has(p.id))
+  const toggleAll = () => setSelectedIds(allChecked ? new Set() : new Set(filtered.map((p) => p.id)))
+  const toggleId = (id: string) => setSelectedIds((prev) => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s })
+  const toggleExpand = (id: string) => setExpandedIds((prev) => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s })
+  const toggleStatusChip = (s: string) => setStatusFilter((prev) => prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s])
+  const toggleFilterAta = (ata: string) => setFilterAta((prev) => { const s = new Set(prev); s.has(ata) ? s.delete(ata) : s.add(ata); return s })
+
+  return (
+    <div className="flex flex-col h-screen">
+      {/* ── Page header ── */}
+      <div className="shrink-0 flex items-center justify-between px-6 py-4 border-b border-divider bg-surface">
+        <div className="flex items-center gap-3">
+          <button onClick={onBack} className="p-1.5 rounded-md hover:bg-surface-hover text-fg-secondary">
+            <ChevronLeft size={18} />
+          </button>
+          <div>
+            <h1 className="text-h3 font-semibold">BOM Navigator | Mass Part Creation</h1>
+            <p className="text-caption text-fg-secondary">{AIRCRAFT_TYPE} &middot; {AIRCRAFT_MSN} &middot; Airbus A321(neo) Parts</p>
+          </div>
+        </div>
+        <Button variant="secondary" size="md" onClick={() => toast({ title: 'Opening creation list...' })}>
+          Creation list
+        </Button>
+      </div>
+
+      {/* ── Filter bar ── */}
+      <div className="shrink-0 px-6 py-3 border-b border-divider bg-surface-secondary flex items-end gap-3 flex-wrap">
+        <div className="flex flex-col gap-1">
+          <label className="text-caption text-fg-secondary font-medium">Task Type</label>
+          <select
+            className="h-8 px-2.5 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary text-sm"
+            defaultValue="general-add"
+          >
+            <option value="general-add">General - Add</option>
+            <option value="general-remove">General - Remove</option>
+            <option value="engineering-order">Engineering Order</option>
+          </select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-caption text-fg-secondary font-medium">ATA Chapter</label>
+          <input
+            value={ataFilter}
+            onChange={(e) => setAtaFilter(e.target.value)}
+            placeholder="e.g. ATA53"
+            className="h-8 px-2.5 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary text-sm w-28"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-caption text-fg-secondary font-medium">MSN</label>
+          <input
+            value={msnFilter}
+            onChange={(e) => setMsnFilter(e.target.value)}
+            placeholder="e.g. MSN-7834"
+            className="h-8 px-2.5 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary text-sm w-28"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-caption text-fg-secondary font-medium">Manufacturer</label>
+          <input
+            value={mfrFilter}
+            onChange={(e) => setMfrFilter(e.target.value)}
+            placeholder="e.g. CFM"
+            className="h-8 px-2.5 rounded-md border border-divider bg-surface text-body outline-none focus:border-primary text-sm w-28"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-caption text-fg-secondary font-medium">Airworthiness Status</label>
+          <div className="flex gap-1.5">
+            {['Active', 'Superseded', 'Inactive'].map((s) => (
+              <button
+                key={s}
+                onClick={() => toggleStatusChip(s)}
+                className={"h-8 px-3 rounded-full text-caption font-medium border transition-colors " + (statusFilter.includes(s) ? 'bg-primary text-surface border-primary' : 'bg-surface text-fg-secondary border-divider hover:bg-surface-hover')}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="flex flex-col gap-1 ml-auto">
+          <label className="text-caption text-fg-secondary font-medium invisible">Query</label>
+          <Button variant="primary" size="sm" onClick={() => toast({ title: 'Query executed — ' + filtered.length + ' results', variant: 'success' })}>
+            Query
+          </Button>
+        </div>
+      </div>
+
+      {/* ── Main content: table + filter panel ── */}
+      <div className="flex flex-1 min-h-0">
+
+        {/* ── Matching result table ── */}
+        <div className="flex-1 flex flex-col min-w-0">
+          <div className="shrink-0 flex items-center justify-between px-4 py-2 border-b border-divider bg-surface">
+            <span className="text-body font-medium">Matching Result</span>
+            <span className="text-caption text-fg-secondary">{filtered.length} records</span>
+          </div>
+
+          <div className="flex-1 overflow-auto">
+            <table className="w-full text-body border-collapse">
+              <thead>
+                <tr className="bg-surface-secondary border-b border-divider sticky top-0 z-10">
+                  <th className="w-8 px-3 py-3"></th>
+                  <th className="w-10 px-3 py-3">
+                    <input type="checkbox" checked={allChecked} onChange={toggleAll}
+                      className="w-4 h-4 rounded border-divider accent-primary cursor-pointer" />
+                  </th>
+                  <th className="px-3 py-3 text-left text-caption text-fg-secondary font-medium">Basic Information</th>
+                  <th className="px-3 py-3 text-left text-caption text-fg-secondary font-medium whitespace-nowrap">MSN</th>
+                  <th className="px-3 py-3 text-left text-caption text-fg-secondary font-medium">Manufacturer</th>
+                  <th className="px-3 py-3 text-left text-caption text-fg-secondary font-medium">Component</th>
+                  <th className="px-3 py-3 text-left text-caption text-fg-secondary font-medium whitespace-nowrap">Airworthiness</th>
+                  <th className="px-3 py-3 text-left text-caption text-fg-secondary font-medium whitespace-nowrap">ATA Part No.</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((part) => (
+                  <>
+                    <tr
+                      key={part.id}
+                      className={"border-b border-divider hover:bg-surface-hover " + (selectedIds.has(part.id) ? 'bg-primary/5' : '')}
+                    >
+                      <td className="w-8 px-2 py-3 text-center">
+                        {part.expandable && (
+                          <button
+                            onClick={() => toggleExpand(part.id)}
+                            className="p-0.5 rounded hover:bg-surface-hover text-fg-tertiary"
+                          >
+                            <ChevronRight size={14} className={"transition-transform " + (expandedIds.has(part.id) ? 'rotate-90' : '')} />
+                          </button>
+                        )}
+                      </td>
+                      <td className="w-10 px-3 py-3">
+                        <input type="checkbox" checked={selectedIds.has(part.id)} onChange={() => toggleId(part.id)}
+                          className="w-4 h-4 rounded border-divider accent-primary cursor-pointer" />
+                      </td>
+                      <td className="px-3 py-3 font-mono text-caption max-w-[260px]">
+                        <span className="block truncate" title={part.serial}>{part.serial}</span>
+                      </td>
+                      <td className="px-3 py-3 font-mono text-caption whitespace-nowrap">{part.msn}</td>
+                      <td className="px-3 py-3 text-fg-secondary whitespace-nowrap">{part.manufacturer}</td>
+                      <td className="px-3 py-3 text-fg-secondary">{part.component}</td>
+                      <td className="px-3 py-3">
+                        <span className={"inline-flex px-2 py-0.5 rounded-full text-caption font-medium border " + (part.airworthiness === 'Active' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-surface-secondary text-fg-secondary border-divider')}>
+                          {part.airworthiness}
+                        </span>
+                      </td>
+                      <td className="px-3 py-3 font-mono text-caption whitespace-nowrap">{part.ataPart}</td>
+                    </tr>
+                    {expandedIds.has(part.id) && (
+                      <tr key={part.id + '-expanded'} className="border-b border-divider bg-surface-secondary/50">
+                        <td colSpan={8} className="px-10 py-3">
+                          <div className="grid grid-cols-3 gap-x-8 gap-y-2 text-caption">
+                            <div><span className="text-fg-tertiary">ATA Chapter: </span><span className="font-mono font-medium">{part.ataChapter}</span></div>
+                            <div><span className="text-fg-tertiary">Manufacturer: </span><span>{part.manufacturer}</span></div>
+                            <div><span className="text-fg-tertiary">Part Number: </span><span className="font-mono">{part.ataPart}</span></div>
+                            <div><span className="text-fg-tertiary">Serial: </span><span className="font-mono">{part.serial.split('-').slice(0, 4).join('-')}</span></div>
+                            <div><span className="text-fg-tertiary">Applied MSN: </span><span className="font-mono">{part.msn}</span></div>
+                            <div><span className="text-fg-tertiary">Status: </span><span>{part.airworthiness}</span></div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </>
+                ))}
+                {filtered.length === 0 && (
+                  <tr>
+                    <td colSpan={8} className="px-4 py-16 text-center text-fg-tertiary text-body">
+                      No parts match the current filter criteria.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* ── Advanced Filter panel ── */}
+        {showFilter && (
+          <div className="w-[300px] shrink-0 border-l border-divider flex flex-col bg-surface">
+            <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-divider">
+              <span className="text-body font-medium">Advanced Filter</span>
+              <button onClick={() => setShowFilter(false)} className="p-1 rounded hover:bg-surface-hover text-fg-tertiary">
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <div className="shrink-0 flex border-b border-divider">
+              {(['WF', 'BP', 'AS'] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setFilterTab(tab)}
+                  className={"flex-1 py-2 text-caption font-medium border-b-2 transition-colors " + (filterTab === tab ? 'border-primary text-primary' : 'border-transparent text-fg-secondary hover:text-fg-primary')}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            {/* Keyword search */}
+            <div className="shrink-0 px-3 py-2.5 border-b border-divider">
+              <div className="flex items-center gap-2 rounded-md border border-divider bg-surface px-2.5 h-8">
+                <Search size={14} className="text-fg-tertiary shrink-0" />
+                <input
+                  value={filterKeyword}
+                  onChange={(e) => setFilterKeyword(e.target.value)}
+                  placeholder="Keyword search..."
+                  className="flex-1 bg-transparent text-caption text-fg-primary outline-none placeholder:text-fg-tertiary"
+                />
+              </div>
+            </div>
+
+            {/* Filter groups */}
+            <div className="flex-1 overflow-y-auto">
+              {/* ATA Chapter group */}
+              <div className="border-b border-divider">
+                <div className="px-4 py-2.5 flex items-center justify-between">
+                  <span className="text-caption font-medium text-fg-primary">ATA Chapter</span>
+                  <ChevronRight size={14} className="text-fg-tertiary" />
+                </div>
+                <div className="px-4 pb-3 flex flex-col gap-2">
+                  {['ATA21', 'ATA27', 'ATA28', 'ATA32', 'ATA36', 'ATA49', 'ATA53', 'ATA57'].map((ata) => (
+                    <label key={ata} className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={filterAta.has(ata)} onChange={() => toggleFilterAta(ata)}
+                        className="w-4 h-4 rounded border-divider accent-primary" />
+                      <span className="text-caption text-fg-secondary font-mono">{ata}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Airworthiness group */}
+              <div className="border-b border-divider">
+                <div className="px-4 py-2.5 flex items-center justify-between">
+                  <span className="text-caption font-medium text-fg-primary">Airworthiness Status</span>
+                  <ChevronRight size={14} className="text-fg-tertiary" />
+                </div>
+                <div className="px-4 pb-3 flex flex-col gap-2">
+                  {['Active', 'Superseded', 'Inactive'].map((s) => (
+                    <label key={s} className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={filterStatus.has(s)} onChange={() => setFilterStatus((prev) => { const ns = new Set(prev); ns.has(s) ? ns.delete(s) : ns.add(s); return ns })}
+                        className="w-4 h-4 rounded border-divider accent-primary" />
+                      <span className="text-caption text-fg-secondary">{s}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Manufacturer group */}
+              <div>
+                <div className="px-4 py-2.5 flex items-center justify-between">
+                  <span className="text-caption font-medium text-fg-primary">Manufacturer</span>
+                  <ChevronRight size={14} className="text-fg-tertiary" />
+                </div>
+                <div className="px-4 pb-3 flex flex-col gap-2">
+                  {['AIRBUS', 'CFM', 'HONEYWELL', 'SAFRAN'].map((m) => (
+                    <label key={m} className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" defaultChecked
+                        className="w-4 h-4 rounded border-divider accent-primary" />
+                      <span className="text-caption text-fg-secondary">{m}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Filter footer */}
+            <div className="shrink-0 border-t border-divider flex items-center gap-2 px-4 py-3">
+              <Button variant="secondary" className="flex-1" onClick={() => { setFilterAta(new Set()); setFilterStatus(new Set()); setFilterKeyword('') }}>
+                Reset
+              </Button>
+              <Button variant="primary" className="flex-1" onClick={() => toast({ title: 'Filter applied — ' + filtered.length + ' results', variant: 'success' })}>
+                Apply Filter
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── Bottom action bar ── */}
+      <div className="shrink-0 border-t border-divider bg-surface flex items-center justify-between px-6 py-3">
+        <span className="text-body text-fg-secondary">
+          Select <span className="font-semibold text-fg-primary">{selectedIds.size}</span> item{selectedIds.size !== 1 ? 's' : ''}
+        </span>
+        <Button
+          variant="primary"
+          disabled={selectedIds.size === 0}
+          onClick={() => toast({ title: selectedIds.size + ' part(s) added to creation list', variant: 'success' })}
+        >
+          Add to list
+        </Button>
+      </div>
+    </div>
+  )
+}
+
 // ── Configurator Page ──
-function ConfiguratorPage() {
+function ConfiguratorPage({ onBatchEntry }: { onBatchEntry: () => void }) {
   return (
     <div className="px-6 py-5 space-y-5">
       <div className="flex items-center gap-1 text-body text-fg-secondary">
@@ -950,7 +1296,7 @@ function ConfiguratorPage() {
           </div>
         </div>
         <Button variant="secondary" size="md" startIcon={Layers}
-          onClick={() => toast({ title: 'Batch part entry dialog opened' })}>
+          onClick={onBatchEntry}>
           Batch Entry
         </Button>
       </div>
@@ -976,16 +1322,21 @@ function ConfiguratorPage() {
 // ── Root ──
 export default function App() {
   const [activeId, setActiveId] = useState<string>('configurator')
+  const [showBatchEntry, setShowBatchEntry] = useState(false)
   return (
     <TooltipProvider delayDuration={500} skipDelayDuration={300}>
       <SidebarProvider activeId={activeId} onActiveChange={setActiveId}>
-        <AppShell
-          layout="primary-sidebar"
-          sidebar={<AppSidebar activeId={activeId} onActiveChange={setActiveId} />}
-          header={<TopHeader />}
-        >
-          <ConfiguratorPage />
-        </AppShell>
+        {showBatchEntry ? (
+          <BatchEntryPage onBack={() => setShowBatchEntry(false)} />
+        ) : (
+          <AppShell
+            layout="primary-sidebar"
+            sidebar={<AppSidebar activeId={activeId} onActiveChange={setActiveId} />}
+            header={<TopHeader />}
+          >
+            <ConfiguratorPage onBatchEntry={() => setShowBatchEntry(true)} />
+          </AppShell>
+        )}
       </SidebarProvider>
       <Toaster />
     </TooltipProvider>
