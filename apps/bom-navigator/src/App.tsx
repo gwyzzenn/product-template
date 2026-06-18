@@ -734,10 +734,9 @@ function RuleSettingsTab() {
   ]
 
   return (
-    <div className="flex flex-col border border-divider" style={{ height: 'calc(100vh - 256px)', minHeight: '500px' }}>
-
-      {/* ── Filter bar: white bg matching table, label-above pattern, icon-only search ── */}
-      <div className="flex items-end gap-3 px-4 pt-3 pb-3 bg-surface border-b border-divider shrink-0">
+    <div className="space-y-4">
+      {/* ── Filter bar ── */}
+      <div className="flex items-end gap-3 p-4 rounded-lg border border-divider bg-surface">
         {[
           { label: 'ATA Chapter', value: ataFilter, onChange: setAtaFilter, placeholder: 'e.g. ATA32' },
           { label: 'Part Number', value: pnFilter, onChange: setPnFilter, placeholder: 'e.g. 32-10-11' },
@@ -753,49 +752,45 @@ function RuleSettingsTab() {
             />
           </Field>
         ))}
-        {/* icon-only search button */}
         <div className="shrink-0">
           <Button
             iconOnly
             startIcon={Search}
             size="sm"
-            aria-label="Search"
+            aria-label="Clear filters"
             onClick={() => { setAtaFilter(''); setPnFilter(''); setTypeFilter('') }}
           />
         </div>
       </div>
 
-      {/* ── Main split: table left + right panel — flex-1 fills remaining height ── */}
-      <div className="flex flex-1 min-h-0">
+      {/* ── Main split: table left + right edit panel ── */}
+      <div className="flex gap-0 rounded-lg border border-divider overflow-hidden">
 
         {/* ── Table column ── */}
-        <div className="flex-1 flex flex-col min-w-0">
-          {/* Table body */}
-          <div className="flex-1 min-h-0">
-            <DataTable
-              columns={columns}
-              data={filtered}
-              height="100%"
-              getRowId={(r) => r.id}
-              selectable
-              selection={[...checkedIds]}
-              onSelectionChange={(ids) => setCheckedIds(new Set(ids))}
-              rowActions={(row) => (
-                <Button
-                  iconOnly
-                  startIcon={Info}
-                  size="sm"
-                  variant="text"
-                  aria-label="View / edit"
-                  onClick={() => setSelected(selected?.id === row.id ? null : row)}
-                />
-              )}
-              emptyState={<div className="px-4 py-16 text-center text-fg-tertiary text-body">No rule records match the current filter.</div>}
-            />
-          </div>
+        <div className="flex-1 min-w-0">
+          <DataTable
+            columns={columns}
+            data={filtered}
+            height="auto"
+            getRowId={(r) => r.id}
+            selectable
+            selection={[...checkedIds]}
+            onSelectionChange={(ids) => setCheckedIds(new Set(ids))}
+            rowActions={(row) => (
+              <Button
+                iconOnly
+                startIcon={Info}
+                size="sm"
+                variant="text"
+                aria-label="View / edit"
+                onClick={() => setSelected(selected?.id === row.id ? null : row)}
+              />
+            )}
+            emptyState={<div className="px-4 py-16 text-center text-fg-tertiary text-body">No rule records match the current filter.</div>}
+          />
 
-          {/* ── Pagination pinned at bottom ── */}
-          <div className="shrink-0 border-t border-divider bg-surface flex items-center px-4 py-2 gap-4">
+          {/* ── Pagination ── */}
+          <div className="border-t border-divider bg-surface flex items-center px-4 py-2 gap-4">
             <span className="text-caption text-fg-secondary flex-1">1 – {filtered.length} of {RULE_RECORDS.length}</span>
             <div className="flex items-center gap-0.5">
               {[1, 2, 3].map((p) => (
@@ -831,9 +826,7 @@ function RuleSettingsTab() {
         {/* ── Right edit panel ── */}
         {selected && (
           <div className="w-[320px] shrink-0 border-l border-divider flex flex-col bg-surface">
-
-            {/* Panel header */}
-            <div className="shrink-0 border-b border-divider flex items-start justify-between px-4 py-4">
+            <div className="border-b border-divider flex items-start justify-between px-4 py-4">
               <div>
                 <div className="text-caption text-fg-secondary">Part Number</div>
                 <div className="text-body-lg font-semibold font-mono mt-0.5">{selected.partNumber}</div>
@@ -843,8 +836,7 @@ function RuleSettingsTab() {
               </button>
             </div>
 
-            {/* Form body */}
-            <div className="flex-1 overflow-y-auto flex flex-col">
+            <div className="flex flex-col">
               {FORM_FIELDS.map(({ label, type, options, value }, idx) => (
                 <div key={label}>
                   <div className="px-4 py-3">
@@ -860,13 +852,9 @@ function RuleSettingsTab() {
                       )}
                     </Field>
                   </div>
-                  {idx < FORM_FIELDS.length - 1 && (
-                    <div className="border-t border-divider" />
-                  )}
+                  {idx < FORM_FIELDS.length - 1 && <div className="border-t border-divider" />}
                 </div>
               ))}
-
-              {/* Delete link */}
               <div className="px-4 py-4">
                 <button
                   onClick={() => toast({ title: `Rule record ${selected.partNumber} deleted`, variant: 'error' })}
@@ -877,8 +865,7 @@ function RuleSettingsTab() {
               </div>
             </div>
 
-            {/* Footer */}
-            <div className="shrink-0 border-t border-divider flex items-center justify-end gap-2 px-4 py-3">
+            <div className="border-t border-divider flex items-center justify-end gap-2 px-4 py-3">
               <Button variant="secondary" onClick={() => setSelected(null)}>Discard</Button>
               <Button variant="primary" onClick={() => toast({ title: `Rule config for ${selected.partNumber} submitted`, variant: 'success' })}>
                 Submit Change
