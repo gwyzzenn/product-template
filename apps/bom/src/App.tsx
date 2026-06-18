@@ -40,13 +40,13 @@ import {
   ItemAvatar,
   Button,
 } from '@qijenchen/design-system'
-import { LayoutDashboard, Users, Settings, FileText, BarChart3 } from 'lucide-react'
+import { LayoutDashboard, List, GitBranch, Package, Settings } from 'lucide-react'
 
 const NAV = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'customers', label: 'Customers', icon: Users },
-  { id: 'orders', label: 'Orders', icon: FileText },
-  { id: 'reports', label: 'Reports', icon: BarChart3 },
+  { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+  { id: 'bom-list', label: 'BOM List', icon: List },
+  { id: 'structure', label: 'Structure', icon: GitBranch },
+  { id: 'components', label: 'Components', icon: Package },
   { id: 'settings', label: 'Settings', icon: Settings },
 ] as const
 
@@ -57,8 +57,8 @@ function AppSidebar() {
       <SidebarHeader>
         {/* Chrome header avatar canonical(per header-canonical.spec.md:57-72):chrome header 不是 row context → raw <Avatar size={24}>,禁用 <ItemAvatar>(會誤啟動 row anatomy lookup)*/}
         <div className="flex items-center gap-2 min-w-0 group-data-[collapsible=icon]:justify-center">
-          <Avatar alt="Acme Product" size={24} shape="square" color="blue" solid />
-          <span className="text-body-lg font-medium truncate group-data-[collapsible=icon]:hidden">Acme Product</span>
+          <Avatar alt="BOM" size={24} shape="square" color="teal" solid />
+          <span className="text-body-lg font-medium truncate group-data-[collapsible=icon]:hidden">BOM</span>
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -114,18 +114,11 @@ function PageHeader({ title, rightSlot }: { title: string; rightSlot?: ReactElem
   )
 }
 
-function DashboardPage() {
+function OverviewPage() {
   return (
     <div className="px-[var(--layout-space-loose)] py-[var(--layout-space-tight)] space-y-6">
-      <section>
-        <h2 className="text-h5 mb-2">Today</h2>
-        <p className="text-body text-fg-secondary">
-          替換為真實業務 — 訂單 / 收入 / 待處理任務等 dashboard widgets。Consume DS components
-          (DataTable / Chart / Card / Stat 等),never modify DS source。
-        </p>
-      </section>
       <section className="grid grid-cols-3 gap-4">
-        {['Revenue', 'Active customers', 'Pending orders'].map((label) => (
+        {['Total BOMs', 'Active Components', 'Pending Reviews'].map((label) => (
           <div key={label} className="rounded-lg border border-divider bg-surface p-4">
             <div className="text-caption text-fg-secondary">{label}</div>
             <div className="text-h3 mt-1">—</div>
@@ -137,9 +130,8 @@ function DashboardPage() {
 }
 
 export default function App() {
-  const [activeId, setActiveId] = useState<string>('dashboard')
+  const [activeId, setActiveId] = useState<string>('overview')
   const current = NAV.find((n) => n.id === activeId) ?? NAV[0]
-  // TooltipProvider self-wrap(Storybook story render 跳過 main.tsx → App 必自帶 TooltipProvider context)
   return (
     <TooltipProvider delayDuration={500} skipDelayDuration={300}>
       <SidebarProvider activeId={activeId} onActiveChange={setActiveId}>
@@ -149,11 +141,11 @@ export default function App() {
           header={
             <PageHeader
               title={current.label}
-              rightSlot={<Button variant="primary" size="md">New customer</Button>}
+              rightSlot={<Button variant="primary" size="md">New BOM</Button>}
             />
           }
         >
-          <DashboardPage />
+          <OverviewPage />
         </AppShell>
       </SidebarProvider>
     </TooltipProvider>

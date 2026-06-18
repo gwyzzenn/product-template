@@ -6,7 +6,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import App from './App'
 
 const meta: Meta<typeof App> = {
-  title: 'Apps/bom/AppShell Dashboard',
+  title: 'Apps/bom/Navigator AppShell Dashboard',
   component: App,
   parameters: {
     layout: 'fullscreen',
