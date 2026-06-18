@@ -1,9 +1,8 @@
 /* tokens.css — extracted from Figma "Training-material" (node 1-3051 / Header)
-   Import once globally (e.g. in .storybook/preview.ts) so every story
-   and your app share the same values. Swap to your tsmcui oklch() tokens
-   by aliasing the same custom-property names. */
+   Scope: applied via .hd element; dark override via [data-theme="dark"] .hd
+   so Header vars don't pollute or conflict with DS package global tokens. */
 
-:root {
+.hd {
   /* ---- neutrals (alpha on black) ---- */
   --color-neutral-9: rgba(0, 0, 0, 0.85);
   --color-neutral-8: rgba(0, 0, 0, 0.65);
@@ -19,7 +18,7 @@
   --color-indigo-5: #506afb;
   --color-indigo-1: #ebeeff;
   --color-surface: #ffffff;
-  --color-surface-elevated: #ffffff; /* menus / inputs — lifts above surface in dark */
+  --color-surface-elevated: #ffffff;
 
   /* ---- semantic ---- */
   --color-primary: var(--color-indigo-6);
@@ -36,42 +35,47 @@
   --hd-active-bg: var(--color-indigo-1);
 
   /* ---- radii ---- */
-  --radius-medium: 4px;   /* radius/radius-medium */
-  --radius-lg: 8px;       /* rounded-lg */
-  --radius-full: 9999px;  /* rounded-full */
+  --radius-medium: 4px;
+  --radius-lg: 8px;
+  --radius-full: 9999px;
 
   /* ---- sizing ---- */
-  --header-height: 56px;  /* height/UI-56 */
-  --control-height: 32px; /* height/UI-32 */
+  --header-height: 56px;
+  --control-height: 32px;
 
   /* ---- type (Roboto) ---- */
   --font-sans: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI",
     "PingFang TC", "Noto Sans TC", system-ui, sans-serif;
-  --fz-small: 12px;   /* font-size/font-small */
-  --fz-medium: 14px;  /* font-size/font-medium */
-  --fz-large: 16px;   /* font-size/font-large */
+  --fz-small: 12px;
+  --fz-medium: 14px;
+  --fz-large: 16px;
 
   /* ---- elevation ---- */
   --elevation-200: 0 12px 28px rgba(0, 0, 0, 0.10), 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
-[data-theme="dark"] {
-  --color-neutral-9: rgba(255, 255, 255, 0.92);
-  --color-neutral-8: rgba(255, 255, 255, 0.70);
-  --color-neutral-7: rgba(255, 255, 255, 0.50);
-  --color-neutral-6: rgba(255, 255, 255, 0.34);
-  --color-neutral-5: rgba(255, 255, 255, 0.22);
-  --color-neutral-4: rgba(255, 255, 255, 0.14);
-  --color-neutral-3: rgba(255, 255, 255, 0.09);
-  --color-neutral-2: rgba(255, 255, 255, 0.06);
+/* Dark mode — scoped to .hd so it's immune to DS global token conflicts.
+   --hd-* vars are set directly (no alias chain) to guarantee correct values. */
+[data-theme="dark"] .hd,
+[data-theme="dark"].hd {
+  --color-surface: #15171c;
+  --color-surface-elevated: #1f2229;
 
-  --color-surface: #15171c;          /* header / base layer */
-  --color-surface-elevated: #1f2229; /* menus, submenus, inputs */
-
-  /* brighter primary so it reads on a dark surface */
-  --color-primary: var(--color-indigo-5); /* #506afb */
+  --color-indigo-6: #3351fa;
+  --color-indigo-5: #506afb;
+  --color-indigo-1: #232a4d;
+  --color-primary: #506afb;
   --color-primary-hover: #6f86ff;
-  --color-indigo-1: #232a4d;              /* subtle active background */
+  --color-on-primary: #ffffff;
+
+  --hd-text-1: rgba(255, 255, 255, 0.92);
+  --hd-text-2: rgba(255, 255, 255, 0.70);
+  --hd-text-3: rgba(255, 255, 255, 0.50);
+  --hd-placeholder: rgba(255, 255, 255, 0.34);
+  --hd-border: rgba(255, 255, 255, 0.22);
+  --hd-border-soft: rgba(255, 255, 255, 0.14);
+  --hd-hover-bg: rgba(255, 255, 255, 0.09);
+  --hd-active-bg: #232a4d;
 
   --elevation-200: 0 14px 32px rgba(0, 0, 0, 0.60), 0 2px 8px rgba(0, 0, 0, 0.45);
 }
