@@ -6,7 +6,9 @@ const config: StorybookConfig = {
   // 2026-05-29 Phase 2 monorepo 2-scenario arch:
   // Published template repo(Scenario B fork user)沒 DS source,storybook 只 glob `apps/**`。
   // 砍掉舊 `../packages/**` glob(per codex r5 Gap 4)— published mirror 不該含 DS internal stories。
-  stories: ['../apps/**/*.stories.@(tsx|mdx)'],
+  stories: process.env.STORYBOOK_APP
+    ? [`../apps/${process.env.STORYBOOK_APP}/**/*.stories.@(tsx|mdx)`]
+    : ['../apps/**/*.stories.@(tsx|mdx)'],
 
   // 2026-05-26 fix(per user 「為何都沒吃到正確元件和設計原則」screenshot):
   // 必須在 Storybook 的 vite build 套 tailwindcss plugin,DS 的 utility classes 才會生效。
