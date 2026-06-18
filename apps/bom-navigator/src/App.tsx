@@ -702,7 +702,7 @@ const RULE_RECORDS: RuleRecord[] = [
 
 function RuleSettingsTab() {
   const [selected, setSelected] = useState<RuleRecord | null>(null)
-  const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set())
+  const [checkedIds, setCheckedIds] = useState<string[]>([])
   const [ataFilter, setAtaFilter] = useState('')
   const [pnFilter, setPnFilter] = useState('')
   const [typeFilter, setTypeFilter] = useState('')
@@ -774,8 +774,8 @@ function RuleSettingsTab() {
             height="auto"
             getRowId={(r) => r.id}
             selectable
-            selection={[...checkedIds]}
-            onSelectionChange={(ids) => setCheckedIds(new Set(ids))}
+            selection={checkedIds}
+            onSelectionChange={setCheckedIds}
             rowActions={(row) => (
               <Button
                 iconOnly
@@ -906,7 +906,7 @@ const BATCH_PARTS: BatchPart[] = [
 ]
 
 function BatchEntryPage({ onBack }: { onBack: () => void }) {
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [ataFilter, setAtaFilter] = useState('')
   const [msnFilter, setMsnFilter] = useState('')
   const [mfrFilter, setMfrFilter] = useState('')
@@ -1032,8 +1032,8 @@ function BatchEntryPage({ onBack }: { onBack: () => void }) {
               height="100%"
               getRowId={(r) => r.id}
               selectable
-              selection={[...selectedIds]}
-              onSelectionChange={(ids) => setSelectedIds(new Set(ids))}
+              selection={selectedIds}
+              onSelectionChange={setSelectedIds}
               emptyState={<div className="px-4 py-16 text-center text-fg-tertiary text-body">No parts match the current filter criteria.</div>}
             />
           </div>
@@ -1141,12 +1141,12 @@ function BatchEntryPage({ onBack }: { onBack: () => void }) {
       {/* ── Bottom action bar ── */}
       <div className="shrink-0 border-t border-divider bg-surface flex items-center justify-between px-6 py-3">
         <span className="text-body text-fg-secondary">
-          Select <span className="font-semibold text-fg-primary">{selectedIds.size}</span> item{selectedIds.size !== 1 ? 's' : ''}
+          Select <span className="font-semibold text-fg-primary">{selectedIds.length}</span> item{selectedIds.length !== 1 ? 's' : ''}
         </span>
         <Button
           variant="primary"
-          disabled={selectedIds.size === 0}
-          onClick={() => toast({ title: selectedIds.size + ' part(s) added to creation list', variant: 'success' })}
+          disabled={selectedIds.length === 0}
+          onClick={() => toast({ title: selectedIds.length + ' part(s) added to creation list', variant: 'success' })}
         >
           Add to list
         </Button>
