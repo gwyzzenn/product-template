@@ -30,7 +30,7 @@ const actionButtons = [
 /** 個人設定 — order: Language → Site → Color Theme. */
 const settings = [
   { label: "Language", icon: headerIcons.globe, submenu: ["English", "繁體中文", "日本語"] },
-  { label: "Site", icon: headerIcons.site, submenu: ["HQ", "Fab 12A", "Fab 14A"] },
+  { label: "Site", icon: headerIcons.site, submenu: ["新竹", "台中", "台南", "高雄"] },
   { label: "Color Theme", icon: headerIcons.theme, toggle: true },
 ];
 

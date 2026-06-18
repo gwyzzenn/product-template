@@ -19,6 +19,7 @@
   --color-indigo-5: #506afb;
   --color-indigo-1: #ebeeff;
   --color-surface: #ffffff;
+  --color-surface-elevated: #ffffff; /* menus / inputs — lifts above surface in dark */
 
   /* ---- semantic ---- */
   --color-primary: var(--color-indigo-6);
@@ -55,15 +56,22 @@
 }
 
 [data-theme="dark"] {
-  --color-neutral-9: rgba(255, 255, 255, 0.88);
-  --color-neutral-8: rgba(255, 255, 255, 0.68);
-  --color-neutral-7: rgba(255, 255, 255, 0.48);
-  --color-neutral-6: rgba(255, 255, 255, 0.30);
-  --color-neutral-5: rgba(255, 255, 255, 0.18);
-  --color-neutral-4: rgba(255, 255, 255, 0.12);
-  --color-neutral-3: rgba(255, 255, 255, 0.08);
-  --color-neutral-2: rgba(255, 255, 255, 0.05);
-  --color-surface: #1c1d22;
-  --color-indigo-1: #23284a;
-  --elevation-200: 0 12px 28px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.4);
+  --color-neutral-9: rgba(255, 255, 255, 0.92);
+  --color-neutral-8: rgba(255, 255, 255, 0.70);
+  --color-neutral-7: rgba(255, 255, 255, 0.50);
+  --color-neutral-6: rgba(255, 255, 255, 0.34);
+  --color-neutral-5: rgba(255, 255, 255, 0.22);
+  --color-neutral-4: rgba(255, 255, 255, 0.14);
+  --color-neutral-3: rgba(255, 255, 255, 0.09);
+  --color-neutral-2: rgba(255, 255, 255, 0.06);
+
+  --color-surface: #15171c;          /* header / base layer */
+  --color-surface-elevated: #1f2229; /* menus, submenus, inputs */
+
+  /* brighter primary so it reads on a dark surface */
+  --color-primary: var(--color-indigo-5); /* #506afb */
+  --color-primary-hover: #6f86ff;
+  --color-indigo-1: #232a4d;              /* subtle active background */
+
+  --elevation-200: 0 14px 32px rgba(0, 0, 0, 0.60), 0 2px 8px rgba(0, 0, 0, 0.45);
 }

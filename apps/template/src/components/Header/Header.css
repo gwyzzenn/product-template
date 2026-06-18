@@ -70,7 +70,7 @@
   display: inline-flex; align-items: center; gap: 8px;
   height: var(--control-height); width: 220px; padding: 0 10px;
   border: 1px solid var(--hd-border); border-radius: var(--radius-medium);
-  background: var(--color-surface); color: var(--hd-placeholder);
+  background: var(--color-surface-elevated); color: var(--hd-placeholder);
 }
 .hd__search svg { color: var(--hd-text-3); flex: none; }
 .hd__search input {
@@ -135,7 +135,7 @@
 .hd__menu {
   position: absolute; top: calc(var(--header-height) - 6px); right: 12px;
   min-width: 220px; padding: 6px; z-index: 40;
-  background: var(--color-surface);
+  background: var(--color-surface-elevated);
   border: 1px solid var(--hd-border-soft); border-radius: var(--radius-lg);
   box-shadow: var(--elevation-200);
   transform-origin: top right;
@@ -168,7 +168,7 @@
 .hd__submenu {
   display: none; position: absolute; top: -6px; right: 100%; margin-right: 4px;
   min-width: 160px; padding: 6px;
-  background: var(--color-surface);
+  background: var(--color-surface-elevated);
   border: 1px solid var(--hd-border-soft); border-radius: var(--radius-lg);
   box-shadow: var(--elevation-200);
 }
