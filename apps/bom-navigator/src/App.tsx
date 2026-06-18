@@ -399,7 +399,7 @@ function PartDetailPanel({ part, children }: { part: PartRecord; children: React
       <SheetTrigger asChild>{children}</SheetTrigger>
       <SheetContent side="right" className="flex flex-col sm:max-w-md">
         <SheetHeader>
-          <SheetTitle className="font-mono">{part.code}</SheetTitle>
+          <SheetTitle className="">{part.code}</SheetTitle>
         </SheetHeader>
         <SheetBody className="flex flex-col gap-5">
           <div className="flex items-center gap-2">
@@ -428,7 +428,7 @@ function PartDetailPanel({ part, children }: { part: PartRecord; children: React
             <div className="rounded-lg border border-divider divide-y divide-divider">
               {['WO-2026-0611', 'WO-2026-0608'].map((wo) => (
                 <div key={wo} className="flex items-center justify-between px-4 py-2.5">
-                  <span className="font-mono text-caption">{wo}</span>
+                  <span className="text-caption">{wo}</span>
                   <Chip label="In Progress" color="orange" />
                 </div>
               ))}
@@ -454,7 +454,7 @@ function ListItemRow({ part }: { part: PartRecord }) {
     <PartDetailPanel part={part}>
       <div className="flex items-center gap-2 px-4 py-3 rounded-lg border border-divider bg-surface cursor-pointer hover:bg-surface-hover hover:shadow-sm transition-all">
         <Info size={14} className="text-fg-tertiary shrink-0" />
-        <span className="text-body font-medium font-mono">{part.code}</span>
+        <span className="text-body font-medium">{part.code}</span>
         <span className="text-fg-tertiary text-body">—</span>
         <span className="text-body text-fg-secondary flex-1 truncate">{part.desc}</span>
         <ChevronRight size={14} className="text-fg-tertiary shrink-0" />
@@ -513,7 +513,7 @@ function DashboardTab() {
     { pn: '57-10-00-001', desc: 'Wing Box Center Section', submitted: '2026-06-09' },
   ]
   const waitColumns: ColumnDef<WaitRow, any>[] = [
-    { accessorKey: 'pn', header: 'Part Number', cell: (info) => <span className="font-mono text-caption">{info.getValue() as string}</span> },
+    { accessorKey: 'pn', header: 'Part Number', cell: (info) => <span className="text-caption">{info.getValue() as string}</span> },
     { accessorKey: 'desc', header: 'Description' },
     { accessorKey: 'submitted', header: 'Submitted' },
     {
@@ -536,7 +536,7 @@ function DashboardTab() {
     { pn: '21-20-00-001', ata: 'ATA 21', field: 'OEM Reference' },
   ]
   const missingColumns: ColumnDef<MissingRow, any>[] = [
-    { accessorKey: 'pn', header: 'Part Number', cell: (info) => <span className="font-mono text-caption">{info.getValue() as string}</span> },
+    { accessorKey: 'pn', header: 'Part Number', cell: (info) => <span className="text-caption">{info.getValue() as string}</span> },
     { accessorKey: 'ata', header: 'ATA Chapter' },
     { accessorKey: 'field', header: 'Missing Field', cell: (info) => <span className="text-destructive">{info.getValue() as string}</span> },
     {
@@ -556,9 +556,9 @@ function DashboardTab() {
     { msn: 'MSN-7835', reg: 'B-18352', wo: 'WO-2026-0608', since: '2026-06-08', status: 'On Track', statusColor: 'green' },
   ]
   const prodColumns: ColumnDef<ProdRow, any>[] = [
-    { accessorKey: 'msn', header: 'MSN', cell: (info) => <span className="font-medium font-mono">{info.getValue() as string}</span> },
+    { accessorKey: 'msn', header: 'MSN', cell: (info) => <span className="font-medium">{info.getValue() as string}</span> },
     { accessorKey: 'reg', header: 'Reg.' },
-    { accessorKey: 'wo', header: 'Work Order', cell: (info) => <span className="font-mono text-caption">{info.getValue() as string}</span> },
+    { accessorKey: 'wo', header: 'Work Order', cell: (info) => <span className="text-caption">{info.getValue() as string}</span> },
     { accessorKey: 'since', header: 'In Service Since' },
     { accessorKey: 'status', header: 'Status', cell: (info) => <Chip label={info.getValue() as string} color={info.row.original.statusColor} /> },
   ]
@@ -622,8 +622,8 @@ function PartsAnalysisTab() {
     { id: 'PAJ-20260609-007', pn: '32-10-11-001', ata: 'ATA 32', date: '2026-06-09 16:48', status: 'Archived', statusColor: 'gray', result: '10 rules applied' },
   ]
   const columns: ColumnDef<AnalysisRow, any>[] = [
-    { accessorKey: 'id', header: 'Job ID', cell: (info) => <span className="font-mono text-caption">{info.getValue() as string}</span> },
-    { accessorKey: 'pn', header: 'Part Number', cell: (info) => <span className="font-mono text-caption">{info.getValue() as string}</span> },
+    { accessorKey: 'id', header: 'Job ID', cell: (info) => <span className="text-caption">{info.getValue() as string}</span> },
+    { accessorKey: 'pn', header: 'Part Number', cell: (info) => <span className="text-caption">{info.getValue() as string}</span> },
     { accessorKey: 'ata', header: 'ATA' },
     { accessorKey: 'date', header: 'Started', cell: (info) => <span className="text-caption">{info.getValue() as string}</span> },
     { accessorKey: 'status', header: 'Status', cell: (info) => <Chip label={info.getValue() as string} color={info.row.original.statusColor} /> },
@@ -657,7 +657,7 @@ function TraceabilityTab() {
     { pn: '49-00-00-001', desc: 'APU APS3200 Assy', ata: 'ATA 49', rev: 'Rev.A', msn: 'MSN-7834', by: 'Mike C.', date: '2026-05-28', status: 'Superseded', statusColor: 'gray' },
   ]
   const columns: ColumnDef<TraceRow, any>[] = [
-    { accessorKey: 'pn', header: 'Part Number', cell: (info) => <span className="font-medium font-mono text-caption">{info.getValue() as string}</span> },
+    { accessorKey: 'pn', header: 'Part Number', cell: (info) => <span className="font-medium text-caption">{info.getValue() as string}</span> },
     { accessorKey: 'desc', header: 'Description' },
     { accessorKey: 'ata', header: 'ATA' },
     { accessorKey: 'rev', header: 'Rev.' },
@@ -723,12 +723,12 @@ function RuleSettingsTab() {
   ] : []
 
   const columns: ColumnDef<RuleRecord, any>[] = [
-    { accessorKey: 'partNumber', header: 'Part Number', cell: (info) => <span className="font-mono text-caption font-semibold">{info.getValue() as string}</span>, meta: { width: 130 } },
+    { accessorKey: 'partNumber', header: 'Part Number', cell: (info) => <span className="text-caption font-semibold">{info.getValue() as string}</span>, meta: { width: 130 } },
     { accessorKey: 'ataChapter', header: 'ATA', cell: (info) => <span className="text-fg-secondary">{info.getValue() as string}</span> },
     { accessorKey: 'level', header: 'Level', cell: (info) => <span className="text-fg-secondary">{info.getValue() as string}</span> },
-    { accessorKey: 'configBy', header: 'Config By', cell: (info) => <span className="font-mono text-caption text-fg-secondary">{info.getValue() as string}</span> },
+    { accessorKey: 'configBy', header: 'Config By', cell: (info) => <span className="text-caption text-fg-secondary">{info.getValue() as string}</span> },
     { accessorKey: 'configType', header: 'Type', cell: (info) => <span className="text-fg-secondary">{info.getValue() as string}</span> },
-    { accessorKey: 'specItem', header: 'Spec Item', cell: (info) => <span className="font-mono text-caption">{info.getValue() as string}</span> },
+    { accessorKey: 'specItem', header: 'Spec Item', cell: (info) => <span className="text-caption">{info.getValue() as string}</span> },
     { accessorKey: 'specValue', header: 'Spec Value', cell: (info) => <span className="text-fg-secondary text-caption">{info.getValue() as string}</span>, meta: { width: 200 } },
     { accessorKey: 'lastModified', header: 'Last Modified', cell: (info) => <span className="text-fg-secondary text-caption">{info.getValue() as string}</span> },
   ]
@@ -829,7 +829,7 @@ function RuleSettingsTab() {
             <div className="border-b border-divider flex items-start justify-between px-4 py-4">
               <div>
                 <div className="text-caption text-fg-secondary">Part Number</div>
-                <div className="text-body-lg font-semibold font-mono mt-0.5">{selected.partNumber}</div>
+                <div className="text-body-lg font-semibold mt-0.5">{selected.partNumber}</div>
               </div>
               <button onClick={() => setSelected(null)} className="p-1 rounded hover:bg-surface-hover text-fg-tertiary mt-0.5">
                 <X size={16} />
@@ -933,9 +933,9 @@ function BatchEntryPage({ onBack }: { onBack: () => void }) {
   const columns: ColumnDef<BatchPart, any>[] = [
     {
       accessorKey: 'serial', header: 'Basic Information', meta: { width: 260 },
-      cell: (info) => <span className="block truncate font-mono text-caption" title={info.getValue() as string}>{info.getValue() as string}</span>,
+      cell: (info) => <span className="block truncate text-caption" title={info.getValue() as string}>{info.getValue() as string}</span>,
     },
-    { accessorKey: 'msn', header: 'MSN', cell: (info) => <span className="font-mono text-caption">{info.getValue() as string}</span> },
+    { accessorKey: 'msn', header: 'MSN', cell: (info) => <span className="text-caption">{info.getValue() as string}</span> },
     { accessorKey: 'manufacturer', header: 'Manufacturer', cell: (info) => <span className="text-fg-secondary">{info.getValue() as string}</span> },
     { accessorKey: 'component', header: 'Component', cell: (info) => <span className="text-fg-secondary">{info.getValue() as string}</span> },
     {
@@ -946,7 +946,7 @@ function BatchEntryPage({ onBack }: { onBack: () => void }) {
         </span>
       ),
     },
-    { accessorKey: 'ataPart', header: 'ATA Part No.', cell: (info) => <span className="font-mono text-caption">{info.getValue() as string}</span> },
+    { accessorKey: 'ataPart', header: 'ATA Part No.', cell: (info) => <span className="text-caption">{info.getValue() as string}</span> },
   ]
 
   return (
@@ -1087,7 +1087,7 @@ function BatchEntryPage({ onBack }: { onBack: () => void }) {
                       key={ata}
                       checked={filterAta.has(ata)}
                       onCheckedChange={() => toggleFilterAta(ata)}
-                      label={<span className="font-mono">{ata}</span>}
+                      label={<span className="">{ata}</span>}
                     />
                   ))}
                 </div>
