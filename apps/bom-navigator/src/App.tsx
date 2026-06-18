@@ -513,7 +513,7 @@ function DashboardTab() {
     { pn: '57-10-00-001', desc: 'Wing Box Center Section', submitted: '2026-06-09' },
   ]
   const waitColumns: ColumnDef<WaitRow, any>[] = [
-    { accessorKey: 'pn', header: 'Part Number', cell: (info) => <span className="text-caption">{info.getValue() as string}</span> },
+    { accessorKey: 'pn', header: 'Part Number' },
     { accessorKey: 'desc', header: 'Description' },
     { accessorKey: 'submitted', header: 'Submitted' },
     {
@@ -536,7 +536,7 @@ function DashboardTab() {
     { pn: '21-20-00-001', ata: 'ATA 21', field: 'OEM Reference' },
   ]
   const missingColumns: ColumnDef<MissingRow, any>[] = [
-    { accessorKey: 'pn', header: 'Part Number', cell: (info) => <span className="text-caption">{info.getValue() as string}</span> },
+    { accessorKey: 'pn', header: 'Part Number' },
     { accessorKey: 'ata', header: 'ATA Chapter' },
     { accessorKey: 'field', header: 'Missing Field', cell: (info) => <span className="text-destructive">{info.getValue() as string}</span> },
     {
@@ -558,7 +558,7 @@ function DashboardTab() {
   const prodColumns: ColumnDef<ProdRow, any>[] = [
     { accessorKey: 'msn', header: 'MSN', cell: (info) => <span className="font-medium">{info.getValue() as string}</span> },
     { accessorKey: 'reg', header: 'Reg.' },
-    { accessorKey: 'wo', header: 'Work Order', cell: (info) => <span className="text-caption">{info.getValue() as string}</span> },
+    { accessorKey: 'wo', header: 'Work Order' },
     { accessorKey: 'since', header: 'In Service Since' },
     { accessorKey: 'status', header: 'Status', cell: (info) => <Chip label={info.getValue() as string} color={info.row.original.statusColor} /> },
   ]
@@ -622,10 +622,10 @@ function PartsAnalysisTab() {
     { id: 'PAJ-20260609-007', pn: '32-10-11-001', ata: 'ATA 32', date: '2026-06-09 16:48', status: 'Archived', statusColor: 'gray', result: '10 rules applied' },
   ]
   const columns: ColumnDef<AnalysisRow, any>[] = [
-    { accessorKey: 'id', header: 'Job ID', cell: (info) => <span className="text-caption">{info.getValue() as string}</span> },
-    { accessorKey: 'pn', header: 'Part Number', cell: (info) => <span className="text-caption">{info.getValue() as string}</span> },
+    { accessorKey: 'id', header: 'Job ID' },
+    { accessorKey: 'pn', header: 'Part Number' },
     { accessorKey: 'ata', header: 'ATA' },
-    { accessorKey: 'date', header: 'Started', cell: (info) => <span className="text-caption">{info.getValue() as string}</span> },
+    { accessorKey: 'date', header: 'Started' },
     { accessorKey: 'status', header: 'Status', cell: (info) => <Chip label={info.getValue() as string} color={info.row.original.statusColor} /> },
     { accessorKey: 'result', header: 'Result' },
     {
@@ -657,11 +657,11 @@ function TraceabilityTab() {
     { pn: '49-00-00-001', desc: 'APU APS3200 Assy', ata: 'ATA 49', rev: 'Rev.A', msn: 'MSN-7834', by: 'Mike C.', date: '2026-05-28', status: 'Superseded', statusColor: 'gray' },
   ]
   const columns: ColumnDef<TraceRow, any>[] = [
-    { accessorKey: 'pn', header: 'Part Number', cell: (info) => <span className="font-medium text-caption">{info.getValue() as string}</span> },
+    { accessorKey: 'pn', header: 'Part Number', cell: (info) => <span className="font-medium">{info.getValue() as string}</span> },
     { accessorKey: 'desc', header: 'Description' },
     { accessorKey: 'ata', header: 'ATA' },
     { accessorKey: 'rev', header: 'Rev.' },
-    { accessorKey: 'msn', header: 'Used In MSN', cell: (info) => <span className="text-caption">{info.getValue() as string}</span> },
+    { accessorKey: 'msn', header: 'Used In MSN' },
     { accessorKey: 'by', header: 'Changed By' },
     { accessorKey: 'date', header: 'Date' },
     { accessorKey: 'status', header: 'Status', cell: (info) => <Chip label={info.getValue() as string} color={info.row.original.statusColor} /> },
@@ -723,14 +723,14 @@ function RuleSettingsTab() {
   ] : []
 
   const columns: ColumnDef<RuleRecord, any>[] = [
-    { accessorKey: 'partNumber', header: 'Part Number', cell: (info) => <span className="text-caption font-semibold">{info.getValue() as string}</span>, meta: { width: 130 } },
+    { accessorKey: 'partNumber', header: 'Part Number', cell: (info) => <span className="font-semibold">{info.getValue() as string}</span>, meta: { width: 130 } },
     { accessorKey: 'ataChapter', header: 'ATA', cell: (info) => <span className="text-fg-secondary">{info.getValue() as string}</span> },
     { accessorKey: 'level', header: 'Level', cell: (info) => <span className="text-fg-secondary">{info.getValue() as string}</span> },
-    { accessorKey: 'configBy', header: 'Config By', cell: (info) => <span className="text-caption text-fg-secondary">{info.getValue() as string}</span> },
+    { accessorKey: 'configBy', header: 'Config By', cell: (info) => <span className="text-fg-secondary">{info.getValue() as string}</span> },
     { accessorKey: 'configType', header: 'Type', cell: (info) => <span className="text-fg-secondary">{info.getValue() as string}</span> },
-    { accessorKey: 'specItem', header: 'Spec Item', cell: (info) => <span className="text-caption">{info.getValue() as string}</span> },
-    { accessorKey: 'specValue', header: 'Spec Value', cell: (info) => <span className="text-fg-secondary text-caption">{info.getValue() as string}</span>, meta: { width: 200 } },
-    { accessorKey: 'lastModified', header: 'Last Modified', cell: (info) => <span className="text-fg-secondary text-caption">{info.getValue() as string}</span> },
+    { accessorKey: 'specItem', header: 'Spec Item' },
+    { accessorKey: 'specValue', header: 'Spec Value', cell: (info) => <span className="text-fg-secondary">{info.getValue() as string}</span>, meta: { width: 200 } },
+    { accessorKey: 'lastModified', header: 'Last Modified', cell: (info) => <span className="text-fg-secondary">{info.getValue() as string}</span> },
   ]
 
   return (
@@ -809,7 +809,7 @@ function RuleSettingsTab() {
               </button>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-caption text-fg-secondary">Items per Page</span>
+              <span className="text-fg-secondary">Items per Page</span>
               <Select
                 size="sm"
                 defaultValue="20"
@@ -933,9 +933,9 @@ function BatchEntryPage({ onBack }: { onBack: () => void }) {
   const columns: ColumnDef<BatchPart, any>[] = [
     {
       accessorKey: 'serial', header: 'Basic Information', meta: { width: 260 },
-      cell: (info) => <span className="block truncate text-caption" title={info.getValue() as string}>{info.getValue() as string}</span>,
+      cell: (info) => <span className="block truncate" title={info.getValue() as string}>{info.getValue() as string}</span>,
     },
-    { accessorKey: 'msn', header: 'MSN', cell: (info) => <span className="text-caption">{info.getValue() as string}</span> },
+    { accessorKey: 'msn', header: 'MSN' },
     { accessorKey: 'manufacturer', header: 'Manufacturer', cell: (info) => <span className="text-fg-secondary">{info.getValue() as string}</span> },
     { accessorKey: 'component', header: 'Component', cell: (info) => <span className="text-fg-secondary">{info.getValue() as string}</span> },
     {
@@ -946,7 +946,7 @@ function BatchEntryPage({ onBack }: { onBack: () => void }) {
         </span>
       ),
     },
-    { accessorKey: 'ataPart', header: 'ATA Part No.', cell: (info) => <span className="text-caption">{info.getValue() as string}</span> },
+    { accessorKey: 'ataPart', header: 'ATA Part No.' },
   ]
 
   return (
@@ -1022,7 +1022,7 @@ function BatchEntryPage({ onBack }: { onBack: () => void }) {
         <div className="flex-1 flex flex-col min-w-0">
           <div className="shrink-0 flex items-center justify-between px-4 py-2 border-b border-divider bg-surface">
             <span className="text-body font-medium">Matching Result</span>
-            <span className="text-caption text-fg-secondary">{filtered.length} records</span>
+            <span className="text-fg-secondary">{filtered.length} records</span>
           </div>
 
           <div className="flex-1 min-h-0">
