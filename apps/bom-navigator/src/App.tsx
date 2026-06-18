@@ -235,7 +235,7 @@ function NotificationMenu() {
         {NOTIFICATIONS.map((n, i) => (
           <DropdownMenuItem key={i} className="flex flex-col items-start gap-0.5 py-2.5">
             <div className="flex items-center gap-2 w-full">
-              <span className="text-sm">{n.icon}</span>
+              <span className="text-body">{n.icon}</span>
               <span className="text-body font-medium flex-1">{n.title}</span>
               <span className="text-caption text-fg-tertiary">{n.time}</span>
             </div>
