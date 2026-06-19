@@ -76,6 +76,11 @@ import {
   Info,
   X,
   ChevronLeft,
+  Building2,
+  ChevronDown,
+  Globe,
+  Sun,
+  Check,
 } from 'lucide-react'
 
 // ── Aircraft: A321-200 MSN-7834 ──
@@ -278,11 +283,69 @@ function ProfileMenu() {
   )
 }
 
+// ── Avatar Menu (replaces ProfileMenu in TopHeader) ──
+function AvatarMenu() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="flex items-center gap-0.5 h-8 px-1.5 rounded-md hover:bg-surface-hover">
+          <Avatar alt="Jake Thompson" size={24} color="blue" />
+          <ChevronDown size={14} className="text-fg-tertiary" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <div className="px-3 py-2.5 flex items-center gap-2.5">
+          <Avatar alt="Jake Thompson" size={36} color="blue" />
+          <div>
+            <div className="text-body font-medium">Jake Thompson</div>
+            <div className="text-caption text-fg-secondary">jake@airline.com</div>
+          </div>
+        </div>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem startIcon={Check}>Select Item 1</DropdownMenuItem>
+        <DropdownMenuItem startIcon={Check}>Select Item 2</DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel>個人設定</DropdownMenuLabel>
+        <DropdownMenuItem startIcon={Globe}>Language</DropdownMenuItem>
+        <DropdownMenuItem startIcon={Building2}>Site</DropdownMenuItem>
+        <DropdownMenuItem startIcon={Sun}>Color Theme</DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem startIcon={LogOut} className="text-destructive">Log Out</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
 // ── Top Chrome Header ──
 function TopHeader(_: { rightSlot?: ReactElement<any, any> }) {
   return (
     <ChromeHeader className="bg-surface">
       <SidebarTrigger />
+
+      {/* Logo */}
+      <div className="flex items-center gap-2 pl-0.5">
+        <div className="w-[26px] h-[26px] rounded-md bg-primary flex items-center justify-center shrink-0">
+          <span className="text-[11px] font-bold text-white tracking-wide">QJ</span>
+        </div>
+        <span className="text-body-lg font-bold text-foreground tracking-wide">BOM</span>
+      </div>
+
+      {/* Org switcher */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="inline-flex items-center gap-1.5 h-8 px-2 rounded-md bg-transparent text-fg-secondary hover:bg-surface-hover text-body font-medium">
+            <Building2 size={16} />
+            <span>HQ</span>
+            <ChevronDown size={14} className="text-fg-tertiary" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem>HQ</DropdownMenuItem>
+          <DropdownMenuItem>MRO-1</DropdownMenuItem>
+          <DropdownMenuItem>MRO-2</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
       <div className="flex-1 max-w-[480px] mx-4">
         <Input
           startIcon={Search}
@@ -300,7 +363,7 @@ function TopHeader(_: { rightSlot?: ReactElement<any, any> }) {
         <button className="p-2 rounded-md hover:bg-surface-hover text-fg-secondary">
           <HelpCircle size={18} />
         </button>
-        <ProfileMenu />
+        <AvatarMenu />
       </div>
     </ChromeHeader>
   )
