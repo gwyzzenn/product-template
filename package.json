@@ -13,6 +13,7 @@
     "typecheck": "tsc -b",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build --output-dir storybook-static",
+    "build-storybook:bom": "STORYBOOK_APP=bom storybook build --output-dir storybook-static",
     "create-app": "node scripts/create-app.mjs",
     "lint:imports": "node scripts/lint-ds-internal-imports.mjs",
     "setup:netlify": "node scripts/setup-netlify-access.mjs",
