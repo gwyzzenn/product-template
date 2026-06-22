@@ -81,8 +81,6 @@ import {
 const AIRCRAFT_MSN = 'MSN-7834'
 const AIRCRAFT_TYPE = 'A321-200'
 
-const TOP_NAV = [{ id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard }] as const
-
 const COMPONENTS_NAV = [
   { id: 'fleet-registry', label: 'Fleet Registry', icon: Server },
   { id: 'assembly-viewer', label: 'Assembly Viewer', icon: List },
@@ -117,23 +115,6 @@ function AppSidebar({ activeId, onActiveChange, viewportInsetTop }: { activeId: 
   return (
     <Sidebar collapsible="icon" viewportInsetTop={viewportInsetTop}>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {TOP_NAV.map(({ id, label, icon }) => (
-                <SidebarMenuItem key={id}>
-                  <SidebarMenuButton id={id} startIcon={icon} tooltip={label}
-                    isActive={activeId === id} onClick={() => onActiveChange(id)}>
-                    {label}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarSeparator className="mx-0" />
-
         <SidebarGroup collapsible defaultOpen>
           <SidebarGroupLabel>Aircraft Components</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -271,9 +252,10 @@ function ProfileMenu() {
 // ── Global Header (全寬，橫跨 viewport) ──
 function GlobalHeader() {
   return (
-    <ChromeHeader className="bg-surface">
-      <SidebarTrigger />
-      <Separator orientation="vertical" className="h-5 mx-1" />
+    <ChromeHeader
+      className="bg-surface"
+      leadingRail={<SidebarTrigger />}
+    >
       <div className="flex items-center gap-2 pl-0.5">
         <div className="w-[26px] h-[26px] rounded-md bg-primary flex items-center justify-center shrink-0">
           <span className="text-[11px] font-bold text-white tracking-wide">A</span>
