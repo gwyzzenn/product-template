@@ -19,7 +19,6 @@ import {
   ChromeHeader,
   TooltipProvider,
   Avatar,
-  ItemAvatar,
   Button,
   Badge,
   Tabs,
@@ -173,7 +172,7 @@ function AppSidebar({ activeId, onActiveChange, viewportInsetTop }: { activeId: 
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <div role="group" aria-label="Jake Thompson">
-                <ItemAvatar alt="Jake Thompson" color="blue" />
+                <Avatar alt="Jake Thompson" color="blue" size={28} />
                 <span data-sidebar="menu-label" className="min-w-0 flex-1 truncate">Jake Thompson</span>
               </div>
             </SidebarMenuButton>
