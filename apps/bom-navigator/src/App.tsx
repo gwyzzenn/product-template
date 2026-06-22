@@ -6,7 +6,6 @@ import {
   SidebarProvider,
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -166,19 +165,6 @@ function AppSidebar({ activeId, onActiveChange, viewportInsetTop }: { activeId: 
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <div role="group" aria-label="Jake Thompson">
-                <Avatar alt="Jake Thompson" color="blue" size={28} />
-                <span data-sidebar="menu-label" className="min-w-0 flex-1 truncate">Jake Thompson</span>
-              </div>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
     </Sidebar>
   )
 }
