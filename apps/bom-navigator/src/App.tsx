@@ -119,9 +119,9 @@ const RUNNING_PARTS = [
 type PartRecord = { code: string; desc: string; ata: string; rev: string; status: string; msn: string; engineer: string; date: string }
 
 // ── AppSidebar ──
-function AppSidebar({ activeId, onActiveChange }: { activeId: string; onActiveChange: (id: string) => void }) {
+function AppSidebar({ activeId, onActiveChange, viewportInsetTop }: { activeId: string; onActiveChange: (id: string) => void; viewportInsetTop?: string }) {
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" viewportInsetTop={viewportInsetTop}>
       <SidebarHeader>
         <div className="flex items-center gap-2 min-w-0 group-data-[collapsible=icon]:justify-center">
           <Avatar alt="ACM" size={24} shape="square" color="blue" solid />
@@ -280,6 +280,62 @@ function ProfileMenu() {
         <DropdownMenuItem startIcon={LogOut} className="text-destructive">Sign Out</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+  )
+}
+
+// ── Global Header (全寬，橫跨 viewport) ──
+function GlobalHeader() {
+  return (
+    <ChromeHeader className="bg-surface">
+      <SidebarTrigger />
+      <div className="flex items-center gap-2 pl-0.5">
+        <div className="w-[26px] h-[26px] rounded-md bg-primary flex items-center justify-center shrink-0">
+          <span className="text-[11px] font-bold text-white tracking-wide">QJ</span>
+        </div>
+        <span className="text-body-lg font-bold text-foreground tracking-wide">BOM</span>
+      </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="inline-flex items-center gap-1.5 h-8 px-2 rounded-md bg-transparent text-fg-secondary hover:bg-surface-hover text-body font-medium">
+            <Building2 size={16} />
+            <span>HQ</span>
+            <ChevronDown size={14} className="text-fg-tertiary" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem>HQ</DropdownMenuItem>
+          <DropdownMenuItem>MRO-1</DropdownMenuItem>
+          <DropdownMenuItem>MRO-2</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </ChromeHeader>
+  )
+}
+
+// ── Local Header (sidebar 右側本地列) ──
+function LocalHeader() {
+  return (
+    <ChromeHeader className="bg-surface">
+      <div className="flex-1 max-w-[480px]">
+        <Input
+          startIcon={Search}
+          defaultValue="A321-200"
+          placeholder="Search part number, assembly, MSN..."
+        />
+      </div>
+      <div className="flex-1" />
+      <div className="flex items-center gap-1">
+        <button className="relative p-2 rounded-md hover:bg-surface-hover text-fg-secondary">
+          <Settings size={18} />
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-notification border-2 border-surface" />
+        </button>
+        <NotificationMenu />
+        <button className="p-2 rounded-md hover:bg-surface-hover text-fg-secondary">
+          <HelpCircle size={18} />
+        </button>
+        <AvatarMenu />
+      </div>
+    </ChromeHeader>
   )
 }
 
@@ -1269,9 +1325,10 @@ export default function App() {
     <TooltipProvider delayDuration={500} skipDelayDuration={300}>
       <SidebarProvider activeId={activeId} onActiveChange={setActiveId}>
         <AppShell
-          layout="primary-sidebar"
-          sidebar={<AppSidebar activeId={activeId} onActiveChange={setActiveId} />}
-          header={<TopHeader />}
+          layout="primary-header"
+          globalHeader={<GlobalHeader />}
+          header={<LocalHeader />}
+          sidebar={<AppSidebar activeId={activeId} onActiveChange={setActiveId} viewportInsetTop="var(--chrome-header-height)" />}
         >
           {showBatchEntry
             ? <BatchEntryPage onBack={() => setShowBatchEntry(false)} />
