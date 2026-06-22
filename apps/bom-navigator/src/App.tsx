@@ -814,8 +814,71 @@ const RULE_RECORDS: RuleRecord[] = [
   { id: '5', partNumber: '27-10-00-001', ataChapter: 'ATA27', level: 'L1', configBy: 'JAKE-T', configType: 'AIL', specItem: 'AIL-LH', specValue: 'REV.B-PENDING, AMS4143, OEM-REF-A321-27-10', lastModified: '2026-06-05 at 11:20' },
 ]
 
-function RuleSettingsTab() {
-  const [selected, setSelected] = useState<RuleRecord | null>(null)
+function buildFormFields(r: RuleRecord): { label: string; type: 'select' | 'input'; options?: string[]; value: string }[] {
+  return [
+    { label: '*ATA Chapter', type: 'select', options: ['ATA21 — Air Conditioning', 'ATA27 — Flight Controls', 'ATA32 — Landing Gear', 'ATA49 — APU', 'ATA53 — Fuselage', 'ATA57 — Wings'], value: r.ataChapter },
+    { label: '*Level', type: 'select', options: ['L1', 'L2', 'L3'], value: r.level },
+    { label: '*Config By', type: 'select', options: ['JAKE-T', 'SARAH-L', 'MIKE-C', 'SYSTEM'], value: r.configBy },
+    { label: '*Config Type', type: 'select', options: ['LSI', 'MLG', 'AIL', 'APU', 'ACM'], value: r.configType },
+    { label: '*Spec Item', type: 'select', options: ['FWD-SECT', 'WB-CTR', 'MLG-LH', 'MLG-RH', 'AIL-LH', 'AIL-RH'], value: r.specItem },
+    { label: '*Spec Value', type: 'input', value: r.specValue.split(',')[0] },
+  ]
+}
+
+function RuleDetailPanel({ selected, onClose }: { selected: RuleRecord; onClose: () => void }) {
+  const FORM_FIELDS = buildFormFields(selected)
+  return (
+    <div className="flex flex-col h-full">
+      <div className="border-b border-divider flex items-start justify-between px-4 py-4">
+        <div>
+          <div className="text-caption text-fg-secondary">Part Number</div>
+          <div className="text-body-lg font-semibold mt-0.5">{selected.partNumber}</div>
+        </div>
+        <button onClick={onClose} className="p-1 rounded hover:bg-surface-hover text-fg-tertiary mt-0.5">
+          <X size={16} />
+        </button>
+      </div>
+
+      <div className="flex flex-col flex-1 overflow-y-auto">
+        {FORM_FIELDS.map(({ label, type, options, value }, idx) => (
+          <div key={label}>
+            <div className="px-4 py-3">
+              <Field>
+                <FieldLabel>{label}</FieldLabel>
+                {type === 'select' ? (
+                  <Select
+                    defaultValue={value}
+                    options={(options ?? []).map((o) => ({ value: o, label: o }))}
+                  />
+                ) : (
+                  <Input defaultValue={value} />
+                )}
+              </Field>
+            </div>
+            {idx < FORM_FIELDS.length - 1 && <div className="border-t border-divider" />}
+          </div>
+        ))}
+        <div className="px-4 py-4">
+          <button
+            onClick={() => toast({ title: `Rule record ${selected.partNumber} deleted`, variant: 'error' })}
+            className="text-destructive text-body font-medium hover:underline"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+
+      <div className="border-t border-divider flex items-center justify-end gap-2 px-4 py-3">
+        <Button variant="secondary" onClick={onClose}>Discard</Button>
+        <Button variant="primary" onClick={() => toast({ title: `Rule config for ${selected.partNumber} submitted`, variant: 'success' })}>
+          Submit Change
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+function RuleSettingsTab({ onSelect }: { onSelect: (r: RuleRecord | null) => void }) {
   const [checkedIds, setCheckedIds] = useState<string[]>([])
   const [ataFilter, setAtaFilter] = useState('')
   const [pnFilter, setPnFilter] = useState('')
@@ -826,15 +889,6 @@ function RuleSettingsTab() {
     (!pnFilter || r.partNumber.includes(pnFilter)) &&
     (!typeFilter || r.configType.toLowerCase().includes(typeFilter.toLowerCase()))
   )
-
-  const FORM_FIELDS: { label: string; type: 'select' | 'input'; options?: string[]; value: string }[] = selected ? [
-    { label: '*ATA Chapter', type: 'select', options: ['ATA21 — Air Conditioning', 'ATA27 — Flight Controls', 'ATA32 — Landing Gear', 'ATA49 — APU', 'ATA53 — Fuselage', 'ATA57 — Wings'], value: selected.ataChapter },
-    { label: '*Level', type: 'select', options: ['L1', 'L2', 'L3'], value: selected.level },
-    { label: '*Config By', type: 'select', options: ['JAKE-T', 'SARAH-L', 'MIKE-C', 'SYSTEM'], value: selected.configBy },
-    { label: '*Config Type', type: 'select', options: ['LSI', 'MLG', 'AIL', 'APU', 'ACM'], value: selected.configType },
-    { label: '*Spec Item', type: 'select', options: ['FWD-SECT', 'WB-CTR', 'MLG-LH', 'MLG-RH', 'AIL-LH', 'AIL-RH'], value: selected.specItem },
-    { label: '*Spec Value', type: 'input', value: selected.specValue.split(',')[0] },
-  ] : []
 
   const columns: ColumnDef<RuleRecord, any>[] = [
     { accessorKey: 'partNumber', header: 'Part Number', cell: (info) => <span className="font-semibold">{info.getValue() as string}</span>, meta: { width: 130 } },
@@ -897,7 +951,7 @@ function RuleSettingsTab() {
                 size="sm"
                 variant="text"
                 aria-label="View / edit"
-                onClick={() => setSelected(selected?.id === row.id ? null : row)}
+                onClick={() => onSelect(row)}
               />
             )}
             emptyState={<div className="px-4 py-16 text-center text-fg-tertiary text-body">No rule records match the current filter.</div>}
@@ -937,56 +991,6 @@ function RuleSettingsTab() {
           </div>
         </div>
 
-        {/* ── Right edit panel ── */}
-        {selected && (
-          <div className="w-[320px] shrink-0 border-l border-divider flex flex-col bg-surface">
-            <div className="border-b border-divider flex items-start justify-between px-4 py-4">
-              <div>
-                <div className="text-caption text-fg-secondary">Part Number</div>
-                <div className="text-body-lg font-semibold mt-0.5">{selected.partNumber}</div>
-              </div>
-              <button onClick={() => setSelected(null)} className="p-1 rounded hover:bg-surface-hover text-fg-tertiary mt-0.5">
-                <X size={16} />
-              </button>
-            </div>
-
-            <div className="flex flex-col">
-              {FORM_FIELDS.map(({ label, type, options, value }, idx) => (
-                <div key={label}>
-                  <div className="px-4 py-3">
-                    <Field>
-                      <FieldLabel>{label}</FieldLabel>
-                      {type === 'select' ? (
-                        <Select
-                          defaultValue={value}
-                          options={(options ?? []).map((o) => ({ value: o, label: o }))}
-                        />
-                      ) : (
-                        <Input defaultValue={value} />
-                      )}
-                    </Field>
-                  </div>
-                  {idx < FORM_FIELDS.length - 1 && <div className="border-t border-divider" />}
-                </div>
-              ))}
-              <div className="px-4 py-4">
-                <button
-                  onClick={() => toast({ title: `Rule record ${selected.partNumber} deleted`, variant: 'error' })}
-                  className="text-destructive text-body font-medium hover:underline"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-
-            <div className="border-t border-divider flex items-center justify-end gap-2 px-4 py-3">
-              <Button variant="secondary" onClick={() => setSelected(null)}>Discard</Button>
-              <Button variant="primary" onClick={() => toast({ title: `Rule config for ${selected.partNumber} submitted`, variant: 'success' })}>
-                Submit Change
-              </Button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )
@@ -1270,7 +1274,7 @@ function BatchEntryPage({ onBack }: { onBack: () => void }) {
 }
 
 // ── Configurator Page ──
-function ConfiguratorPage({ onBatchEntry }: { onBatchEntry: () => void }) {
+function ConfiguratorPage({ onBatchEntry, onSelectRule }: { onBatchEntry: () => void; onSelectRule: (r: RuleRecord | null) => void }) {
   return (
     <div className="px-6 py-5 space-y-5">
       <div className="flex items-center gap-1 text-body text-fg-secondary">
@@ -1306,7 +1310,7 @@ function ConfiguratorPage({ onBatchEntry }: { onBatchEntry: () => void }) {
         <TabsContent value="dashboard" className="mt-6"><DashboardTab /></TabsContent>
         <TabsContent value="parts-analysis" className="mt-6"><PartsAnalysisTab /></TabsContent>
         <TabsContent value="traceability" className="mt-6"><TraceabilityTab /></TabsContent>
-        <TabsContent value="rule-settings" className="mt-6"><RuleSettingsTab /></TabsContent>
+        <TabsContent value="rule-settings" className="mt-6"><RuleSettingsTab onSelect={onSelectRule} /></TabsContent>
       </Tabs>
     </div>
   )
@@ -1317,6 +1321,7 @@ export default function App() {
   const [activeId, setActiveId] = useState<string>('configurator')
   const [showBatchEntry, setShowBatchEntry] = useState(false)
   const [asideOpen, setAsideOpen] = useState(false)
+  const [selectedRule, setSelectedRule] = useState<RuleRecord | null>(null)
   return (
     <TooltipProvider delayDuration={500} skipDelayDuration={300}>
       <SidebarProvider activeId={activeId} onActiveChange={setActiveId}>
@@ -1325,8 +1330,13 @@ export default function App() {
           globalHeader={<GlobalHeader />}
           sidebar={<AppSidebar activeId={activeId} onActiveChange={setActiveId} viewportInsetTop="var(--chrome-header-height)" />}
           aside={
-            <AppShellAside title="詳情" width={360}>
-              <div className="p-4 text-body text-fg-secondary">右側面板</div>
+            <AppShellAside title={selectedRule ? selectedRule.partNumber : '詳情'} width={360}>
+              {selectedRule && (
+                <RuleDetailPanel
+                  selected={selectedRule}
+                  onClose={() => { setSelectedRule(null); setAsideOpen(false) }}
+                />
+              )}
             </AppShellAside>
           }
           asideOpen={asideOpen}
@@ -1334,7 +1344,10 @@ export default function App() {
         >
           {showBatchEntry
             ? <BatchEntryPage onBack={() => setShowBatchEntry(false)} />
-            : <ConfiguratorPage onBatchEntry={() => setShowBatchEntry(true)} />}
+            : <ConfiguratorPage
+                onBatchEntry={() => setShowBatchEntry(true)}
+                onSelectRule={(r) => { setSelectedRule(r); setAsideOpen(r !== null) }}
+              />}
         </AppShell>
       </SidebarProvider>
       <Toaster />
