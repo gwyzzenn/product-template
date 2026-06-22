@@ -294,6 +294,13 @@ function GlobalHeader() {
         </div>
         <span className="text-body-lg font-bold text-foreground tracking-wide">BOM</span>
       </div>
+      <div className="flex-1 max-w-[480px] mx-4">
+        <Input
+          startIcon={Search}
+          defaultValue="A321-200"
+          placeholder="Search part number, assembly, MSN..."
+        />
+      </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button className="inline-flex items-center gap-1.5 h-8 px-2 rounded-md bg-transparent text-fg-secondary hover:bg-surface-hover text-body font-medium">
@@ -308,21 +315,6 @@ function GlobalHeader() {
           <DropdownMenuItem>MRO-2</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-    </ChromeHeader>
-  )
-}
-
-// ── Local Header (sidebar 右側本地列) ──
-function LocalHeader() {
-  return (
-    <ChromeHeader className="bg-surface">
-      <div className="flex-1 max-w-[480px]">
-        <Input
-          startIcon={Search}
-          defaultValue="A321-200"
-          placeholder="Search part number, assembly, MSN..."
-        />
-      </div>
       <div className="flex-1" />
       <div className="flex items-center gap-1">
         <button className="relative p-2 rounded-md hover:bg-surface-hover text-fg-secondary">
@@ -1327,7 +1319,6 @@ export default function App() {
         <AppShell
           layout="primary-header"
           globalHeader={<GlobalHeader />}
-          header={<LocalHeader />}
           sidebar={<AppSidebar activeId={activeId} onActiveChange={setActiveId} viewportInsetTop="var(--chrome-header-height)" />}
         >
           {showBatchEntry
