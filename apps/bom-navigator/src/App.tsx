@@ -493,15 +493,6 @@ function PartDetailAside({ part, onClose }: { part: PartRecord; onClose: () => v
     part.status === 'Active' ? 'green' : part.status === 'Pending Review' ? 'orange' : 'gray'
   return (
     <div className="flex flex-col h-full">
-      <div className="border-b border-divider flex items-start justify-between px-4 py-4">
-        <div>
-          <div className="text-caption text-fg-secondary">Part Code</div>
-          <div className="text-body-lg font-semibold mt-0.5">{part.code}</div>
-        </div>
-        <button onClick={onClose} className="p-1 rounded hover:bg-surface-hover text-fg-tertiary mt-0.5">
-          <X size={16} />
-        </button>
-      </div>
       <div className="flex flex-col flex-1 overflow-y-auto px-4 py-4 gap-5">
         <div className="flex items-center gap-2">
           <Chip label={part.status} color={statusColor} />
@@ -788,15 +779,6 @@ function TraceabilityTab({ onSelect }: { onSelect: (r: TraceRow | null) => void 
 function AnalysisDetailAside({ record, onClose }: { record: AnalysisRow; onClose: () => void }) {
   return (
     <div className="flex flex-col h-full">
-      <div className="border-b border-divider flex items-start justify-between px-4 py-4">
-        <div>
-          <div className="text-caption text-fg-secondary">Job ID</div>
-          <div className="text-body-lg font-semibold mt-0.5">{record.id}</div>
-        </div>
-        <button onClick={onClose} className="p-1 rounded hover:bg-surface-hover text-fg-tertiary mt-0.5">
-          <X size={16} />
-        </button>
-      </div>
       <div className="flex flex-col flex-1 overflow-y-auto">
         <div className="rounded-lg border border-divider divide-y divide-divider mx-4 mt-4">
           {[
@@ -827,15 +809,6 @@ function AnalysisDetailAside({ record, onClose }: { record: AnalysisRow; onClose
 function TraceDetailAside({ record, onClose }: { record: TraceRow; onClose: () => void }) {
   return (
     <div className="flex flex-col h-full">
-      <div className="border-b border-divider flex items-start justify-between px-4 py-4">
-        <div>
-          <div className="text-caption text-fg-secondary">Part Number</div>
-          <div className="text-body-lg font-semibold mt-0.5">{record.pn}</div>
-        </div>
-        <button onClick={onClose} className="p-1 rounded hover:bg-surface-hover text-fg-tertiary mt-0.5">
-          <X size={16} />
-        </button>
-      </div>
       <div className="flex flex-col flex-1 overflow-y-auto">
         <div className="rounded-lg border border-divider divide-y divide-divider mx-4 mt-4">
           {[
@@ -900,16 +873,6 @@ function RuleDetailPanel({ selected, onClose }: { selected: RuleRecord; onClose:
   const FORM_FIELDS = buildFormFields(selected)
   return (
     <div className="flex flex-col h-full">
-      <div className="border-b border-divider flex items-start justify-between px-4 py-4">
-        <div>
-          <div className="text-caption text-fg-secondary">Part Number</div>
-          <div className="text-body-lg font-semibold mt-0.5">{selected.partNumber}</div>
-        </div>
-        <button onClick={onClose} className="p-1 rounded hover:bg-surface-hover text-fg-tertiary mt-0.5">
-          <X size={16} />
-        </button>
-      </div>
-
       <div className="flex flex-col flex-1 overflow-y-auto">
         {FORM_FIELDS.map(({ label, type, options, value }, idx) => (
           <div key={label}>
@@ -1085,15 +1048,6 @@ type BatchPart = {
 function BatchDetailAside({ record, onClose }: { record: BatchPart; onClose: () => void }) {
   return (
     <div className="flex flex-col h-full">
-      <div className="border-b border-divider flex items-start justify-between px-4 py-4">
-        <div>
-          <div className="text-caption text-fg-secondary">Serial</div>
-          <div className="text-body-lg font-semibold mt-0.5 break-all">{record.serial}</div>
-        </div>
-        <button onClick={onClose} className="p-1 rounded hover:bg-surface-hover text-fg-tertiary mt-0.5 shrink-0 ml-2">
-          <X size={16} />
-        </button>
-      </div>
       <div className="flex flex-col flex-1 overflow-y-auto">
         <div className="rounded-lg border border-divider divide-y divide-divider mx-4 mt-4">
           {[
