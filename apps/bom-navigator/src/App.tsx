@@ -124,15 +124,6 @@ type PartRecord = { code: string; desc: string; ata: string; rev: string; status
 function AppSidebar({ activeId, onActiveChange, viewportInsetTop }: { activeId: string; onActiveChange: (id: string) => void; viewportInsetTop?: string }) {
   return (
     <Sidebar collapsible="icon" viewportInsetTop={viewportInsetTop}>
-      <SidebarHeader>
-        <div className="flex items-center gap-2 min-w-0 group-data-[collapsible=icon]:justify-center">
-          <Avatar alt="ACM" size={24} shape="square" color="blue" solid />
-          <span className="text-body-lg font-semibold truncate group-data-[collapsible=icon]:hidden">
-            Aircraft Master
-          </span>
-        </div>
-      </SidebarHeader>
-
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
@@ -293,7 +284,7 @@ function GlobalHeader() {
       <Separator orientation="vertical" className="h-5 mx-1" />
       <div className="flex items-center gap-2 pl-0.5">
         <div className="w-[26px] h-[26px] rounded-md bg-primary flex items-center justify-center shrink-0">
-          <span className="text-[11px] font-bold text-white tracking-wide">QJ</span>
+          <span className="text-[11px] font-bold text-white tracking-wide">A</span>
         </div>
         <span className="text-body-lg font-bold text-foreground tracking-wide">Aircraft Master</span>
       </div>
