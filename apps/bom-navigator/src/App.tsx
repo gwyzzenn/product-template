@@ -2,6 +2,7 @@ import { useState, type ReactElement } from 'react'
 import type { ColumnDef } from '@tanstack/react-table'
 import {
   AppShell,
+  AppShellAside,
   SidebarProvider,
   Sidebar,
   SidebarContent,
@@ -294,7 +295,7 @@ function GlobalHeader() {
         <div className="w-[26px] h-[26px] rounded-md bg-primary flex items-center justify-center shrink-0">
           <span className="text-[11px] font-bold text-white tracking-wide">QJ</span>
         </div>
-        <span className="text-body-lg font-bold text-foreground tracking-wide">BOM</span>
+        <span className="text-body-lg font-bold text-foreground tracking-wide">Aircraft Master</span>
       </div>
       <div className="flex-1 max-w-[480px] mx-4">
         <Input
@@ -1315,6 +1316,7 @@ function ConfiguratorPage({ onBatchEntry }: { onBatchEntry: () => void }) {
 export default function App() {
   const [activeId, setActiveId] = useState<string>('configurator')
   const [showBatchEntry, setShowBatchEntry] = useState(false)
+  const [asideOpen, setAsideOpen] = useState(false)
   return (
     <TooltipProvider delayDuration={500} skipDelayDuration={300}>
       <SidebarProvider activeId={activeId} onActiveChange={setActiveId}>
@@ -1322,6 +1324,13 @@ export default function App() {
           layout="primary-header"
           globalHeader={<GlobalHeader />}
           sidebar={<AppSidebar activeId={activeId} onActiveChange={setActiveId} viewportInsetTop="var(--chrome-header-height)" />}
+          aside={
+            <AppShellAside title="詳情" width={360}>
+              <div className="p-4 text-body text-fg-secondary">右側面板</div>
+            </AppShellAside>
+          }
+          asideOpen={asideOpen}
+          onAsideOpenChange={setAsideOpen}
         >
           {showBatchEntry
             ? <BatchEntryPage onBack={() => setShowBatchEntry(false)} />
