@@ -1334,7 +1334,7 @@ function ConfiguratorPage({
   onSelectTrace: (r: TraceRow | null) => void
 }) {
   return (
-    <div className="px-6 py-5 space-y-5">
+    <div className="px-6 pb-5 space-y-5">
       <div className="flex items-center gap-1 text-body text-fg-secondary">
         <span className="hover:text-fg-primary cursor-pointer">Aircraft Master</span>
         <span className="mx-1">/</span>
