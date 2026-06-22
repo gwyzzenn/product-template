@@ -46,6 +46,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  Separator,
   DropdownMenuLabel,
   DataTable,
   Input,
@@ -288,6 +289,7 @@ function GlobalHeader() {
   return (
     <ChromeHeader className="bg-surface">
       <SidebarTrigger />
+      <Separator orientation="vertical" className="h-5 mx-1" />
       <div className="flex items-center gap-2 pl-0.5">
         <div className="w-[26px] h-[26px] rounded-md bg-primary flex items-center justify-center shrink-0">
           <span className="text-[11px] font-bold text-white tracking-wide">QJ</span>
