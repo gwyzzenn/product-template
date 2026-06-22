@@ -34,14 +34,6 @@ import {
   DialogFooter,
   DialogTitle,
   DialogClose,
-  Sheet,
-  SheetTrigger,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetBody,
-  SheetFooter,
-  SheetClose,
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
@@ -495,76 +487,76 @@ function EditPartDialog({ part, children }: { part: PartRecord; children: ReactE
   )
 }
 
-// ── Part Detail Panel (first-level Sheet) ──
-function PartDetailPanel({ part, children }: { part: PartRecord; children: ReactElement<any, any> }) {
+// ── Part Detail Aside ──
+function PartDetailAside({ part, onClose }: { part: PartRecord; onClose: () => void }) {
   const statusColor: 'green' | 'orange' | 'gray' =
     part.status === 'Active' ? 'green' : part.status === 'Pending Review' ? 'orange' : 'gray'
   return (
-    <Sheet>
-      <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent side="right" className="flex flex-col sm:max-w-md">
-        <SheetHeader>
-          <SheetTitle className="">{part.code}</SheetTitle>
-        </SheetHeader>
-        <SheetBody className="flex flex-col gap-5">
-          <div className="flex items-center gap-2">
-            <Chip label={part.status} color={statusColor} />
-            <span className="text-caption text-fg-tertiary">{part.rev}</span>
-          </div>
-
+    <div className="flex flex-col h-full">
+      <div className="border-b border-divider flex items-start justify-between px-4 py-4">
+        <div>
+          <div className="text-caption text-fg-secondary">Part Code</div>
+          <div className="text-body-lg font-semibold mt-0.5">{part.code}</div>
+        </div>
+        <button onClick={onClose} className="p-1 rounded hover:bg-surface-hover text-fg-tertiary mt-0.5">
+          <X size={16} />
+        </button>
+      </div>
+      <div className="flex flex-col flex-1 overflow-y-auto px-4 py-4 gap-5">
+        <div className="flex items-center gap-2">
+          <Chip label={part.status} color={statusColor} />
+          <span className="text-caption text-fg-tertiary">{part.rev}</span>
+        </div>
+        <div className="rounded-lg border border-divider divide-y divide-divider">
+          {[
+            { label: 'Description', value: part.desc },
+            { label: 'ATA Chapter', value: part.ata },
+            { label: 'Revision', value: part.rev },
+            { label: 'Used in MSN', value: part.msn },
+            { label: 'Assigned Engineer', value: part.engineer },
+            { label: 'Last Modified', value: part.date },
+          ].map(({ label, value }) => (
+            <div key={label} className="flex items-start gap-3 px-4 py-3">
+              <span className="text-caption text-fg-secondary w-36 shrink-0 pt-0.5">{label}</span>
+              <span className="text-body text-fg-primary">{value}</span>
+            </div>
+          ))}
+        </div>
+        <div>
+          <h3 className="text-body font-medium mb-2">Related Work Orders</h3>
           <div className="rounded-lg border border-divider divide-y divide-divider">
-            {[
-              { label: 'Description', value: part.desc },
-              { label: 'ATA Chapter', value: part.ata },
-              { label: 'Revision', value: part.rev },
-              { label: 'Used in MSN', value: part.msn },
-              { label: 'Assigned Engineer', value: part.engineer },
-              { label: 'Last Modified', value: part.date },
-            ].map(({ label, value }) => (
-              <div key={label} className="flex items-start gap-3 px-4 py-3">
-                <span className="text-caption text-fg-secondary w-36 shrink-0 pt-0.5">{label}</span>
-                <span className="text-body text-fg-primary">{value}</span>
+            {['WO-2026-0611', 'WO-2026-0608'].map((wo) => (
+              <div key={wo} className="flex items-center justify-between px-4 py-2.5">
+                <span className="text-caption">{wo}</span>
+                <Chip label="In Progress" color="orange" />
               </div>
             ))}
           </div>
-
-          <div>
-            <h3 className="text-body font-medium mb-2">Related Work Orders</h3>
-            <div className="rounded-lg border border-divider divide-y divide-divider">
-              {['WO-2026-0611', 'WO-2026-0608'].map((wo) => (
-                <div key={wo} className="flex items-center justify-between px-4 py-2.5">
-                  <span className="text-caption">{wo}</span>
-                  <Chip label="In Progress" color="orange" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </SheetBody>
-        <SheetFooter>
-          <SheetClose asChild>
-            <Button variant="secondary">Close</Button>
-          </SheetClose>
-          <EditPartDialog part={part}>
-            <Button variant="primary" startIcon={Wrench}>Edit Part</Button>
-          </EditPartDialog>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </div>
+      </div>
+      <div className="border-t border-divider flex items-center justify-end gap-2 px-4 py-3">
+        <Button variant="secondary" onClick={onClose}>Close</Button>
+        <EditPartDialog part={part}>
+          <Button variant="primary" startIcon={Wrench}>Edit Part</Button>
+        </EditPartDialog>
+      </div>
+    </div>
   )
 }
 
-// ── List Item Row (click = Sheet panel) ──
-function ListItemRow({ part }: { part: PartRecord }) {
+// ── List Item Row ──
+function ListItemRow({ part, onSelect }: { part: PartRecord; onSelect: (r: PartRecord) => void }) {
   return (
-    <PartDetailPanel part={part}>
-      <div className="flex items-center gap-2 px-4 py-3 rounded-lg border border-divider bg-surface cursor-pointer hover:bg-surface-hover hover:shadow-sm transition-all">
-        <Info size={14} className="text-fg-tertiary shrink-0" />
-        <span className="text-body font-medium">{part.code}</span>
-        <span className="text-fg-tertiary text-body">—</span>
-        <span className="text-body text-fg-secondary flex-1 truncate">{part.desc}</span>
-        <ChevronRight size={14} className="text-fg-tertiary shrink-0" />
-      </div>
-    </PartDetailPanel>
+    <div
+      onClick={() => onSelect(part)}
+      className="flex items-center gap-2 px-4 py-3 rounded-lg border border-divider bg-surface cursor-pointer hover:bg-surface-hover hover:shadow-sm transition-all"
+    >
+      <Info size={14} className="text-fg-tertiary shrink-0" />
+      <span className="text-body font-medium">{part.code}</span>
+      <span className="text-fg-tertiary text-body">—</span>
+      <span className="text-body text-fg-secondary flex-1 truncate">{part.desc}</span>
+      <ChevronRight size={14} className="text-fg-tertiary shrink-0" />
+    </div>
   )
 }
 
@@ -612,7 +604,7 @@ type WaitRow = { pn: string; desc: string; submitted: string }
 type MissingRow = { pn: string; ata: string; field: string }
 type ProdRow = { msn: string; reg: string; wo: string; since: string; status: string; statusColor: 'green' | 'orange' | 'gray' }
 
-function DashboardTab() {
+function DashboardTab({ onSelect }: { onSelect: (r: PartRecord | null) => void }) {
   const waitData: WaitRow[] = [
     { pn: '53-11-00-001', desc: 'Fuselage Fwd Section Assy', submitted: '2026-06-10' },
     { pn: '57-10-00-001', desc: 'Wing Box Center Section', submitted: '2026-06-09' },
@@ -697,8 +689,8 @@ function DashboardTab() {
           <Button variant="link" size="sm" onClick={() => toast({ title: 'Loading full assembly list...' })}>View more</Button>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <ListItemRow part={{ code: '53-11-00-001', desc: 'Fuselage Fwd Section Assy', ata: 'ATA 53', rev: 'Rev.C', status: 'Active', msn: 'MSN-7834, MSN-7835', engineer: 'Jake Thompson', date: '2026-06-10' }} />
-          <ListItemRow part={{ code: '57-10-00-001', desc: 'Wing Box Center Section', ata: 'ATA 57', rev: 'Rev.B', status: 'Pending Review', msn: 'MSN-7834', engineer: 'Sarah Lin', date: '2026-06-09' }} />
+          <ListItemRow part={{ code: '53-11-00-001', desc: 'Fuselage Fwd Section Assy', ata: 'ATA 53', rev: 'Rev.C', status: 'Active', msn: 'MSN-7834, MSN-7835', engineer: 'Jake Thompson', date: '2026-06-10' }} onSelect={onSelect} />
+          <ListItemRow part={{ code: '57-10-00-001', desc: 'Wing Box Center Section', ata: 'ATA 57', rev: 'Rev.B', status: 'Pending Review', msn: 'MSN-7834', engineer: 'Sarah Lin', date: '2026-06-09' }} onSelect={onSelect} />
         </div>
       </section>
 
@@ -709,7 +701,7 @@ function DashboardTab() {
         </div>
         <div className="grid grid-cols-2 gap-3">
           {RUNNING_PARTS.map((r, i) => (
-            <ListItemRow key={i} part={r} />
+            <ListItemRow key={i} part={r} onSelect={onSelect} />
           ))}
         </div>
       </section>
@@ -720,7 +712,7 @@ function DashboardTab() {
 // ── Parts Analysis Tab ──
 type AnalysisRow = { id: string; pn: string; ata: string; date: string; status: string; statusColor: 'green' | 'orange' | 'gray'; result: string }
 
-function PartsAnalysisTab() {
+function PartsAnalysisTab({ onSelect }: { onSelect: (r: AnalysisRow | null) => void }) {
   const data: AnalysisRow[] = [
     { id: 'PAJ-20260611-001', pn: '53-11-00-001', ata: 'ATA 53', date: '2026-06-11 09:32', status: 'Completed', statusColor: 'green', result: '12 rules applied' },
     { id: 'PAJ-20260610-003', pn: '57-10-00-001', ata: 'ATA 57', date: '2026-06-10 14:15', status: 'Warning', statusColor: 'orange', result: '8 rules, 2 conflicts' },
@@ -735,7 +727,7 @@ function PartsAnalysisTab() {
     { accessorKey: 'result', header: 'Result' },
     {
       id: 'action', header: 'Action',
-      cell: (info) => <Button variant="secondary" size="sm" onClick={() => toast({ title: `Viewing ${info.row.original.id}` })}>View</Button>,
+      cell: (info) => <Button variant="secondary" size="sm" onClick={() => onSelect(info.row.original)}>View</Button>,
     },
   ]
   return (
@@ -754,7 +746,7 @@ function PartsAnalysisTab() {
 // ── Traceability Tab ──
 type TraceRow = { pn: string; desc: string; ata: string; rev: string; msn: string; by: string; date: string; status: string; statusColor: 'green' | 'orange' | 'gray' }
 
-function TraceabilityTab() {
+function TraceabilityTab({ onSelect }: { onSelect: (r: TraceRow | null) => void }) {
   const data: TraceRow[] = [
     { pn: '53-11-00-001', desc: 'Fuselage Fwd Section', ata: 'ATA 53', rev: 'Rev.C', msn: 'MSN-7834, MSN-7835', by: 'Jake T.', date: '2026-06-10', status: 'Active', statusColor: 'green' },
     { pn: '57-10-00-001', desc: 'Wing Box Center', ata: 'ATA 57', rev: 'Rev.B', msn: 'MSN-7834', by: 'Sarah L.', date: '2026-06-08', status: 'Review', statusColor: 'orange' },
@@ -779,7 +771,95 @@ function TraceabilityTab() {
           Export
         </Button>
       </div>
-      <DataTable columns={columns} data={data} height="auto" getRowId={(r) => r.pn} />
+      <DataTable
+        columns={columns}
+        data={data}
+        height="auto"
+        getRowId={(r) => r.pn}
+        rowActions={(row) => (
+          <Button iconOnly startIcon={Info} size="sm" variant="text" aria-label="View details" onClick={() => onSelect(row)} />
+        )}
+      />
+    </div>
+  )
+}
+
+// ── Analysis Detail Aside ──
+function AnalysisDetailAside({ record, onClose }: { record: AnalysisRow; onClose: () => void }) {
+  return (
+    <div className="flex flex-col h-full">
+      <div className="border-b border-divider flex items-start justify-between px-4 py-4">
+        <div>
+          <div className="text-caption text-fg-secondary">Job ID</div>
+          <div className="text-body-lg font-semibold mt-0.5">{record.id}</div>
+        </div>
+        <button onClick={onClose} className="p-1 rounded hover:bg-surface-hover text-fg-tertiary mt-0.5">
+          <X size={16} />
+        </button>
+      </div>
+      <div className="flex flex-col flex-1 overflow-y-auto">
+        <div className="rounded-lg border border-divider divide-y divide-divider mx-4 mt-4">
+          {[
+            { label: 'Part Number', value: record.pn },
+            { label: 'ATA Chapter', value: record.ata },
+            { label: 'Started', value: record.date },
+            { label: 'Result', value: record.result },
+          ].map(({ label, value }) => (
+            <div key={label} className="flex items-start gap-3 px-4 py-3">
+              <span className="text-caption text-fg-secondary w-36 shrink-0 pt-0.5">{label}</span>
+              <span className="text-body text-fg-primary">{value}</span>
+            </div>
+          ))}
+          <div className="flex items-start gap-3 px-4 py-3">
+            <span className="text-caption text-fg-secondary w-36 shrink-0 pt-0.5">Status</span>
+            <Chip label={record.status} color={record.statusColor} />
+          </div>
+        </div>
+      </div>
+      <div className="border-t border-divider flex items-center justify-end gap-2 px-4 py-3">
+        <Button variant="secondary" onClick={onClose}>Close</Button>
+      </div>
+    </div>
+  )
+}
+
+// ── Trace Detail Aside ──
+function TraceDetailAside({ record, onClose }: { record: TraceRow; onClose: () => void }) {
+  return (
+    <div className="flex flex-col h-full">
+      <div className="border-b border-divider flex items-start justify-between px-4 py-4">
+        <div>
+          <div className="text-caption text-fg-secondary">Part Number</div>
+          <div className="text-body-lg font-semibold mt-0.5">{record.pn}</div>
+        </div>
+        <button onClick={onClose} className="p-1 rounded hover:bg-surface-hover text-fg-tertiary mt-0.5">
+          <X size={16} />
+        </button>
+      </div>
+      <div className="flex flex-col flex-1 overflow-y-auto">
+        <div className="rounded-lg border border-divider divide-y divide-divider mx-4 mt-4">
+          {[
+            { label: 'Description', value: record.desc },
+            { label: 'ATA Chapter', value: record.ata },
+            { label: 'Revision', value: record.rev },
+            { label: 'Used in MSN', value: record.msn },
+            { label: 'Changed By', value: record.by },
+            { label: 'Date', value: record.date },
+          ].map(({ label, value }) => (
+            <div key={label} className="flex items-start gap-3 px-4 py-3">
+              <span className="text-caption text-fg-secondary w-36 shrink-0 pt-0.5">{label}</span>
+              <span className="text-body text-fg-primary">{value}</span>
+            </div>
+          ))}
+          <div className="flex items-start gap-3 px-4 py-3">
+            <span className="text-caption text-fg-secondary w-36 shrink-0 pt-0.5">Status</span>
+            <Chip label={record.status} color={record.statusColor} />
+          </div>
+        </div>
+      </div>
+      <div className="border-t border-divider flex items-center justify-end gap-2 px-4 py-3">
+        <Button variant="secondary" onClick={onClose}>Close</Button>
+      </div>
     </div>
   )
 }
@@ -1001,6 +1081,57 @@ type BatchPart = {
   expandable?: boolean
 }
 
+// ── Batch Detail Aside ──
+function BatchDetailAside({ record, onClose }: { record: BatchPart; onClose: () => void }) {
+  return (
+    <div className="flex flex-col h-full">
+      <div className="border-b border-divider flex items-start justify-between px-4 py-4">
+        <div>
+          <div className="text-caption text-fg-secondary">Serial</div>
+          <div className="text-body-lg font-semibold mt-0.5 break-all">{record.serial}</div>
+        </div>
+        <button onClick={onClose} className="p-1 rounded hover:bg-surface-hover text-fg-tertiary mt-0.5 shrink-0 ml-2">
+          <X size={16} />
+        </button>
+      </div>
+      <div className="flex flex-col flex-1 overflow-y-auto">
+        <div className="rounded-lg border border-divider divide-y divide-divider mx-4 mt-4">
+          {[
+            { label: 'MSN', value: record.msn },
+            { label: 'Manufacturer', value: record.manufacturer },
+            { label: 'Component', value: record.component },
+            { label: 'ATA Part No.', value: record.ataPart },
+            { label: 'ATA Chapter', value: record.ataChapter },
+          ].map(({ label, value }) => (
+            <div key={label} className="flex items-start gap-3 px-4 py-3">
+              <span className="text-caption text-fg-secondary w-36 shrink-0 pt-0.5">{label}</span>
+              <span className="text-body text-fg-primary">{value}</span>
+            </div>
+          ))}
+          <div className="flex items-start gap-3 px-4 py-3">
+            <span className="text-caption text-fg-secondary w-36 shrink-0 pt-0.5">Airworthiness</span>
+            <Chip
+              label={record.airworthiness}
+              color={record.airworthiness === 'Active' ? 'green' : 'gray'}
+            />
+          </div>
+        </div>
+      </div>
+      <div className="border-t border-divider flex items-center justify-end gap-2 px-4 py-3">
+        <Button variant="secondary" onClick={onClose}>Close</Button>
+      </div>
+    </div>
+  )
+}
+
+// ── AsideContent discriminated union ──
+type AsideContent =
+  | { type: 'rule'; record: RuleRecord }
+  | { type: 'part'; record: PartRecord }
+  | { type: 'analysis'; record: AnalysisRow }
+  | { type: 'trace'; record: TraceRow }
+  | { type: 'batch'; record: BatchPart }
+
 const BATCH_PARTS: BatchPart[] = [
   { id: '1', serial: 'A321NEO-53-FWD-SN001-ATA53-REV.C-CFM-LEAP1A', msn: 'MSN-7834', manufacturer: 'AIRBUS', component: 'Fuselage Fwd Section', airworthiness: 'Active', ataPart: '53-11-00-001', ataChapter: 'ATA53', expandable: true },
   { id: '2', serial: 'A321NEO-57-WB-SN002-ATA57-REV.B-AIRBUS-CTR', msn: 'MSN-7834', manufacturer: 'AIRBUS', component: 'Wing Box Center Section', airworthiness: 'Active', ataPart: '57-10-00-001', ataChapter: 'ATA57', expandable: true },
@@ -1014,7 +1145,7 @@ const BATCH_PARTS: BatchPart[] = [
   { id: '10', serial: 'A321NEO-36-BLEED-SN010-ATA36-REV.B-CFM-HP', msn: 'MSN-7835', manufacturer: 'CFM', component: 'Bleed Air High-Pressure Valve', airworthiness: 'Active', ataPart: '36-11-00-001', ataChapter: 'ATA36', expandable: true },
 ]
 
-function BatchEntryPage({ onBack }: { onBack: () => void }) {
+function BatchEntryPage({ onBack, onSelect }: { onBack: () => void; onSelect: (r: BatchPart | null) => void }) {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [ataFilter, setAtaFilter] = useState('')
   const [msnFilter, setMsnFilter] = useState('')
@@ -1143,6 +1274,9 @@ function BatchEntryPage({ onBack }: { onBack: () => void }) {
               selectable
               selection={selectedIds}
               onSelectionChange={setSelectedIds}
+              rowActions={(row) => (
+                <Button iconOnly startIcon={Info} size="sm" variant="text" aria-label="View details" onClick={() => onSelect(row)} />
+              )}
               emptyState={<div className="px-4 py-16 text-center text-fg-tertiary text-body">No parts match the current filter criteria.</div>}
             />
           </div>
@@ -1265,7 +1399,19 @@ function BatchEntryPage({ onBack }: { onBack: () => void }) {
 }
 
 // ── Configurator Page ──
-function ConfiguratorPage({ onBatchEntry, onSelectRule }: { onBatchEntry: () => void; onSelectRule: (r: RuleRecord | null) => void }) {
+function ConfiguratorPage({
+  onBatchEntry,
+  onSelectRule,
+  onSelectPart,
+  onSelectAnalysis,
+  onSelectTrace,
+}: {
+  onBatchEntry: () => void
+  onSelectRule: (r: RuleRecord | null) => void
+  onSelectPart: (r: PartRecord | null) => void
+  onSelectAnalysis: (r: AnalysisRow | null) => void
+  onSelectTrace: (r: TraceRow | null) => void
+}) {
   return (
     <div className="px-6 py-5 space-y-5">
       <div className="flex items-center gap-1 text-body text-fg-secondary">
@@ -1298,9 +1444,9 @@ function ConfiguratorPage({ onBatchEntry, onSelectRule }: { onBatchEntry: () => 
           <TabsTrigger value="traceability">Traceability</TabsTrigger>
           <TabsTrigger value="rule-settings">Rule Settings</TabsTrigger>
         </TabsList>
-        <TabsContent value="dashboard" className="mt-6"><DashboardTab /></TabsContent>
-        <TabsContent value="parts-analysis" className="mt-6"><PartsAnalysisTab /></TabsContent>
-        <TabsContent value="traceability" className="mt-6"><TraceabilityTab /></TabsContent>
+        <TabsContent value="dashboard" className="mt-6"><DashboardTab onSelect={onSelectPart} /></TabsContent>
+        <TabsContent value="parts-analysis" className="mt-6"><PartsAnalysisTab onSelect={onSelectAnalysis} /></TabsContent>
+        <TabsContent value="traceability" className="mt-6"><TraceabilityTab onSelect={onSelectTrace} /></TabsContent>
         <TabsContent value="rule-settings" className="mt-6"><RuleSettingsTab onSelect={onSelectRule} /></TabsContent>
       </Tabs>
     </div>
@@ -1308,11 +1454,25 @@ function ConfiguratorPage({ onBatchEntry, onSelectRule }: { onBatchEntry: () => 
 }
 
 // ── Root ──
+function getAsideTitle(c: AsideContent | null): string {
+  if (!c) return '詳情'
+  if (c.type === 'rule') return c.record.partNumber
+  if (c.type === 'part') return c.record.code
+  if (c.type === 'analysis') return c.record.id
+  if (c.type === 'trace') return c.record.pn
+  if (c.type === 'batch') return c.record.serial
+  return '詳情'
+}
+
 export default function App() {
   const [activeId, setActiveId] = useState<string>('configurator')
   const [showBatchEntry, setShowBatchEntry] = useState(false)
   const [asideOpen, setAsideOpen] = useState(false)
-  const [selectedRule, setSelectedRule] = useState<RuleRecord | null>(null)
+  const [asideContent, setAsideContent] = useState<AsideContent | null>(null)
+
+  const closeAside = () => { setAsideContent(null); setAsideOpen(false) }
+  const openAside = (c: AsideContent) => { setAsideContent(c); setAsideOpen(true) }
+
   return (
     <TooltipProvider delayDuration={500} skipDelayDuration={300}>
       <SidebarProvider activeId={activeId} onActiveChange={setActiveId}>
@@ -1321,23 +1481,28 @@ export default function App() {
           globalHeader={<GlobalHeader />}
           sidebar={<AppSidebar activeId={activeId} onActiveChange={setActiveId} viewportInsetTop="var(--chrome-header-height)" />}
           aside={
-            <AppShellAside title={selectedRule ? selectedRule.partNumber : '詳情'} width={360}>
-              {selectedRule && (
-                <RuleDetailPanel
-                  selected={selectedRule}
-                  onClose={() => { setSelectedRule(null); setAsideOpen(false) }}
-                />
-              )}
+            <AppShellAside title={getAsideTitle(asideContent)} width={380}>
+              {asideContent?.type === 'rule'     && <RuleDetailPanel     selected={asideContent.record} onClose={closeAside} />}
+              {asideContent?.type === 'part'     && <PartDetailAside     part={asideContent.record}     onClose={closeAside} />}
+              {asideContent?.type === 'analysis' && <AnalysisDetailAside record={asideContent.record}   onClose={closeAside} />}
+              {asideContent?.type === 'trace'    && <TraceDetailAside    record={asideContent.record}   onClose={closeAside} />}
+              {asideContent?.type === 'batch'    && <BatchDetailAside    record={asideContent.record}   onClose={closeAside} />}
             </AppShellAside>
           }
           asideOpen={asideOpen}
-          onAsideOpenChange={setAsideOpen}
+          onAsideOpenChange={(open) => { setAsideOpen(open); if (!open) setAsideContent(null) }}
         >
           {showBatchEntry
-            ? <BatchEntryPage onBack={() => setShowBatchEntry(false)} />
+            ? <BatchEntryPage
+                onBack={() => setShowBatchEntry(false)}
+                onSelect={(r) => r ? openAside({ type: 'batch', record: r }) : closeAside()}
+              />
             : <ConfiguratorPage
                 onBatchEntry={() => setShowBatchEntry(true)}
-                onSelectRule={(r) => { setSelectedRule(r); setAsideOpen(r !== null) }}
+                onSelectRule={(r) => r ? openAside({ type: 'rule', record: r }) : closeAside()}
+                onSelectPart={(r) => r ? openAside({ type: 'part', record: r }) : closeAside()}
+                onSelectAnalysis={(r) => r ? openAside({ type: 'analysis', record: r }) : closeAside()}
+                onSelectTrace={(r) => r ? openAside({ type: 'trace', record: r }) : closeAside()}
               />}
         </AppShell>
       </SidebarProvider>
