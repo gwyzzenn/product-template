@@ -1265,9 +1265,9 @@ function ConfiguratorPage({
         }
       >
         <Plane size={18} className="text-fg-secondary shrink-0" />
-        <div className="min-w-0">
-          <span className="text-body-lg font-semibold">{AIRCRAFT_TYPE}</span>
-          <span className="ml-2 text-body text-fg-secondary">{AIRCRAFT_MSN} · Reg. B-18351 · CFM56-5B</span>
+        <div className="min-w-0 flex flex-col">
+          <span className="text-body-lg font-semibold leading-tight">{AIRCRAFT_TYPE}</span>
+          <span className="text-caption text-fg-secondary leading-tight">{AIRCRAFT_MSN} · Reg. B-18351 · CFM56-5B</span>
         </div>
         <div className="flex-1" />
         <Button variant="secondary" size="sm" startIcon={Layers} onClick={onBatchEntry}>Batch Entry</Button>
