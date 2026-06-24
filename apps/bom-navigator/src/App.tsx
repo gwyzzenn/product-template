@@ -1252,43 +1252,31 @@ function ConfiguratorPage({
   onSelectTrace: (r: TraceRow | null) => void
 }) {
   return (
-    <div className="px-6 pb-5 space-y-5">
-      <div className="flex items-center gap-1 text-body text-fg-secondary">
-        <span className="hover:text-fg-primary cursor-pointer">Aircraft Master</span>
-        <span className="mx-1">/</span>
-        <span className="hover:text-fg-primary cursor-pointer">Configurator</span>
-        <span className="mx-1">/</span>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Plane size={22} className="text-fg-secondary" />
-          <div>
-            <h1 className="text-h3 font-semibold">{AIRCRAFT_TYPE}</h1>
-            <p className="text-caption text-fg-secondary">{AIRCRAFT_MSN} &middot; Reg. B-18351 &middot; CFM56-5B</p>
-          </div>
+    <Tabs defaultValue="dashboard">
+      <ChromeHeader
+        className="bg-surface"
+        tabsSlot={
+          <TabsList>
+            <TabsTrigger value="dashboard" badge={<Badge count={99} max={99} variant="high" />}>Dashboard</TabsTrigger>
+            <TabsTrigger value="parts-analysis">Parts Analysis</TabsTrigger>
+            <TabsTrigger value="traceability">Traceability</TabsTrigger>
+            <TabsTrigger value="rule-settings">Rule Settings</TabsTrigger>
+          </TabsList>
+        }
+      >
+        <Plane size={18} className="text-fg-secondary shrink-0" />
+        <div className="min-w-0">
+          <span className="text-body-lg font-semibold">{AIRCRAFT_TYPE}</span>
+          <span className="ml-2 text-body text-fg-secondary">{AIRCRAFT_MSN} · Reg. B-18351 · CFM56-5B</span>
         </div>
-        <Button variant="secondary" size="md" startIcon={Layers}
-          onClick={onBatchEntry}>
-          Batch Entry
-        </Button>
-      </div>
-
-      <Tabs defaultValue="dashboard">
-        <TabsList size="lg">
-          <TabsTrigger value="dashboard" badge={<Badge count={99} max={99} variant="high" />}>
-            Dashboard
-          </TabsTrigger>
-          <TabsTrigger value="parts-analysis">Parts Analysis</TabsTrigger>
-          <TabsTrigger value="traceability">Traceability</TabsTrigger>
-          <TabsTrigger value="rule-settings">Rule Settings</TabsTrigger>
-        </TabsList>
-        <TabsContent value="dashboard" className="mt-6"><DashboardTab onSelect={onSelectPart} /></TabsContent>
-        <TabsContent value="parts-analysis" className="mt-6"><PartsAnalysisTab onSelect={onSelectAnalysis} /></TabsContent>
-        <TabsContent value="traceability" className="mt-6"><TraceabilityTab onSelect={onSelectTrace} /></TabsContent>
-        <TabsContent value="rule-settings" className="mt-6"><RuleSettingsTab onSelect={onSelectRule} /></TabsContent>
-      </Tabs>
-    </div>
+        <div className="flex-1" />
+        <Button variant="secondary" size="sm" startIcon={Layers} onClick={onBatchEntry}>Batch Entry</Button>
+      </ChromeHeader>
+      <TabsContent value="dashboard"><DashboardTab onSelect={onSelectPart} /></TabsContent>
+      <TabsContent value="parts-analysis"><PartsAnalysisTab onSelect={onSelectAnalysis} /></TabsContent>
+      <TabsContent value="traceability"><TraceabilityTab onSelect={onSelectTrace} /></TabsContent>
+      <TabsContent value="rule-settings"><RuleSettingsTab onSelect={onSelectRule} /></TabsContent>
+    </Tabs>
   )
 }
 
