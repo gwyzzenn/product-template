@@ -1,0 +1,11 @@
+<!-- 強制載入 Roboto web font(品牌唯一字體)。
+     DS 的 --font-sans token 把 Roboto 排第一但「假設系統已有」不主動載入,
+     在 Netlify / 沒裝 Roboto 的機器上會 fallback 系統字。
+     這裡實際載入 Roboto(weight 400/500/700,對齊 font-normal/medium/semibold/bold 用法),
+     確保產品 UI 真正吃到 Roboto。 -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Roboto:wght@400..700&display=swap"
+  rel="stylesheet"
+/>
