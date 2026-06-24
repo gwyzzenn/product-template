@@ -546,7 +546,7 @@ function DashboardTab({ onSelect }: { onSelect: (r: PartRecord | null) => void }
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-6 pt-5 pb-6">
       <section>
         <h2 className="text-body-lg font-semibold mb-3">Summary</h2>
         <div className="flex gap-4">
@@ -607,7 +607,7 @@ function PartsAnalysisTab({ onSelect }: { onSelect: (r: AnalysisRow | null) => v
     },
   ]
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 px-6 pt-5 pb-6">
       <div className="flex items-center justify-between">
         <h2 className="text-body-lg font-semibold">Parts Analysis</h2>
         <Button variant="primary" size="sm" onClick={() => toast({ title: `New analysis job started for ${AIRCRAFT_TYPE} ${AIRCRAFT_MSN}`, variant: 'success' })}>
@@ -640,7 +640,7 @@ function TraceabilityTab({ onSelect }: { onSelect: (r: TraceRow | null) => void 
     { accessorKey: 'status', header: 'Status', cell: (info) => <Chip label={info.getValue() as string} color={info.row.original.statusColor} /> },
   ]
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 px-6 pt-5 pb-6">
       <div className="flex items-center justify-between">
         <h2 className="text-body-lg font-semibold">Traceability — {AIRCRAFT_TYPE} {AIRCRAFT_MSN}</h2>
         <Button variant="tertiary" size="sm" startIcon={Download} onClick={() => toast({ title: 'Exporting traceability report...' })}>
@@ -821,7 +821,7 @@ function RuleSettingsTab({ onSelect }: { onSelect: (r: RuleRecord | null) => voi
   ]
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 px-6 pt-5 pb-6">
       {/* ── Filter bar ── */}
       <div className="flex items-end gap-3 p-4 rounded-lg border border-divider bg-surface">
         {[
