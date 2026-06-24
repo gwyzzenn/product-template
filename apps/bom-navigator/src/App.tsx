@@ -359,7 +359,7 @@ function EditPartDialog({ part, children }: { part: PartRecord; children: ReactE
         </DialogBody>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="secondary">Cancel</Button>
+            <Button variant="tertiary">Cancel</Button>
           </DialogClose>
           <DialogClose asChild>
             <Button variant="primary" onClick={() => toast({ title: `Changes saved for ${part.code}`, variant: 'success' })}>
@@ -411,7 +411,7 @@ function PartDetailAside({ part, onClose }: { part: PartRecord; onClose: () => v
         </div>
       </div>
       <div className="border-t border-divider flex items-center justify-end gap-2 px-4 py-3">
-        <Button variant="secondary" onClick={onClose}>Close</Button>
+        <Button variant="tertiary" onClick={onClose}>Close</Button>
         <EditPartDialog part={part}>
           <Button variant="primary" startIcon={Wrench}>Edit Part</Button>
         </EditPartDialog>
@@ -467,7 +467,7 @@ function StatCard({ title, count, subtitle, badge, dialog }: {
         <DialogBody>{dialog.body}</DialogBody>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="secondary">Close</Button>
+            <Button variant="tertiary">Close</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>
@@ -515,7 +515,7 @@ function DashboardTab({ onSelect }: { onSelect: (r: PartRecord | null) => void }
     {
       id: 'action', header: 'Action',
       cell: (info) => (
-        <Button variant="secondary" size="sm" onClick={() => toast({ title: `Editing ${info.row.original.pn}...`, variant: 'info' })}>Fix</Button>
+        <Button variant="tertiary" size="sm" onClick={() => toast({ title: `Editing ${info.row.original.pn}...`, variant: 'info' })}>Fix</Button>
       ),
     },
   ]
@@ -603,7 +603,7 @@ function PartsAnalysisTab({ onSelect }: { onSelect: (r: AnalysisRow | null) => v
     { accessorKey: 'result', header: 'Result' },
     {
       id: 'action', header: 'Action',
-      cell: (info) => <Button variant="secondary" size="sm" onClick={() => onSelect(info.row.original)}>View</Button>,
+      cell: (info) => <Button variant="tertiary" size="sm" onClick={() => onSelect(info.row.original)}>View</Button>,
     },
   ]
   return (
@@ -643,7 +643,7 @@ function TraceabilityTab({ onSelect }: { onSelect: (r: TraceRow | null) => void 
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-body-lg font-semibold">Traceability — {AIRCRAFT_TYPE} {AIRCRAFT_MSN}</h2>
-        <Button variant="secondary" size="sm" startIcon={Download} onClick={() => toast({ title: 'Exporting traceability report...' })}>
+        <Button variant="tertiary" size="sm" startIcon={Download} onClick={() => toast({ title: 'Exporting traceability report...' })}>
           Export
         </Button>
       </div>
@@ -684,7 +684,7 @@ function AnalysisDetailAside({ record, onClose }: { record: AnalysisRow; onClose
         </div>
       </div>
       <div className="border-t border-divider flex items-center justify-end gap-2 px-4 py-3">
-        <Button variant="secondary" onClick={onClose}>Close</Button>
+        <Button variant="tertiary" onClick={onClose}>Close</Button>
       </div>
     </div>
   )
@@ -716,7 +716,7 @@ function TraceDetailAside({ record, onClose }: { record: TraceRow; onClose: () =
         </div>
       </div>
       <div className="border-t border-divider flex items-center justify-end gap-2 px-4 py-3">
-        <Button variant="secondary" onClick={onClose}>Close</Button>
+        <Button variant="tertiary" onClick={onClose}>Close</Button>
       </div>
     </div>
   )
@@ -788,7 +788,7 @@ function RuleDetailPanel({ selected, onClose }: { selected: RuleRecord; onClose:
       </div>
 
       <div className="border-t border-divider flex items-center justify-end gap-2 px-4 py-3">
-        <Button variant="secondary" onClick={onClose}>Discard</Button>
+        <Button variant="tertiary" onClick={onClose}>Discard</Button>
         <Button variant="primary" onClick={() => toast({ title: `Rule config for ${selected.partNumber} submitted`, variant: 'success' })}>
           Submit Change
         </Button>
@@ -957,7 +957,7 @@ function BatchDetailAside({ record, onClose }: { record: BatchPart; onClose: () 
         </div>
       </div>
       <div className="border-t border-divider flex items-center justify-end gap-2 px-4 py-3">
-        <Button variant="secondary" onClick={onClose}>Close</Button>
+        <Button variant="tertiary" onClick={onClose}>Close</Button>
       </div>
     </div>
   )
@@ -1041,7 +1041,7 @@ function BatchEntryPage({ onBack, onSelect }: { onBack: () => void; onSelect: (r
             <p className="text-caption text-fg-secondary">{AIRCRAFT_TYPE} &middot; {AIRCRAFT_MSN} &middot; Airbus A321(neo) Parts</p>
           </div>
         </div>
-        <Button variant="secondary" size="md" onClick={() => toast({ title: 'Opening creation list...' })}>
+        <Button variant="tertiary" size="md" onClick={() => toast({ title: 'Opening creation list...' })}>
           Creation list
         </Button>
       </div>
@@ -1209,7 +1209,7 @@ function BatchEntryPage({ onBack, onSelect }: { onBack: () => void; onSelect: (r
 
             {/* Filter footer */}
             <div className="shrink-0 border-t border-divider flex items-center gap-2 px-4 py-3">
-              <Button variant="secondary" className="flex-1" onClick={() => { setFilterAta(new Set()); setFilterStatus(new Set()); setFilterKeyword('') }}>
+              <Button variant="tertiary" className="flex-1" onClick={() => { setFilterAta(new Set()); setFilterStatus(new Set()); setFilterKeyword('') }}>
                 Reset
               </Button>
               <Button variant="primary" className="flex-1" onClick={() => toast({ title: 'Filter applied — ' + filtered.length + ' results', variant: 'success' })}>
@@ -1270,7 +1270,7 @@ function ConfiguratorPage({
           <span className="text-caption text-fg-secondary leading-tight">{AIRCRAFT_MSN} · Reg. B-18351 · CFM56-5B</span>
         </div>
         <div className="flex-1" />
-        <Button variant="secondary" size="sm" startIcon={Layers} onClick={onBatchEntry}>Batch Entry</Button>
+        <Button variant="tertiary" size="sm" startIcon={Layers} onClick={onBatchEntry}>Batch Entry</Button>
       </ChromeHeader>
       <TabsContent value="dashboard"><DashboardTab onSelect={onSelectPart} /></TabsContent>
       <TabsContent value="parts-analysis"><PartsAnalysisTab onSelect={onSelectAnalysis} /></TabsContent>
