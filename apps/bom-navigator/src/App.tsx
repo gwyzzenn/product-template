@@ -203,36 +203,6 @@ function NotificationMenu() {
   )
 }
 
-// ── Profile Dropdown ──
-function ProfileMenu() {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button className="flex items-center gap-2 rounded-md hover:bg-surface-hover px-2 py-1">
-          <Avatar alt="Jake Thompson" size={28} color="blue" />
-          <span className="text-body font-medium">Jake Thompson</span>
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-fg-tertiary">
-            <path d="M3 5l4 4 4-4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-          </svg>
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-52">
-        <div className="px-3 py-2.5 flex items-center gap-2.5">
-          <Avatar alt="Jake Thompson" size={36} color="blue" />
-          <div>
-            <div className="text-body font-medium">Jake Thompson</div>
-            <div className="text-caption text-fg-secondary">jake@airline.com</div>
-          </div>
-        </div>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem startIcon={User}>My Profile</DropdownMenuItem>
-        <DropdownMenuItem startIcon={Settings}>Preferences</DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem startIcon={LogOut} className="text-destructive">Sign Out</DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-}
 
 // ── Global Header (全寬，橫跨 viewport) ──
 function GlobalHeader() {
@@ -318,58 +288,6 @@ function AvatarMenu() {
 }
 
 // ── Top Chrome Header ──
-function TopHeader(_: { rightSlot?: ReactElement<any, any> }) {
-  return (
-    <ChromeHeader className="bg-surface">
-      <SidebarTrigger />
-
-      {/* Logo */}
-      <div className="flex items-center gap-2 pl-0.5">
-        <div className="w-[26px] h-[26px] rounded-md bg-primary flex items-center justify-center shrink-0">
-          <span className="text-[11px] font-bold text-white tracking-wide">QJ</span>
-        </div>
-        <span className="text-body-lg font-bold text-foreground tracking-wide">BOM</span>
-      </div>
-
-      {/* Org switcher */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button className="inline-flex items-center gap-1.5 h-8 px-2 rounded-md bg-transparent text-fg-secondary hover:bg-surface-hover text-body font-medium">
-            <Building2 size={16} />
-            <span>HQ</span>
-            <ChevronDown size={14} className="text-fg-tertiary" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem>HQ</DropdownMenuItem>
-          <DropdownMenuItem>MRO-1</DropdownMenuItem>
-          <DropdownMenuItem>MRO-2</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <div className="flex-1 max-w-[480px] mx-4">
-        <Input
-          startIcon={Search}
-          defaultValue="A321-200"
-          placeholder="Search part number, assembly, MSN..."
-        />
-      </div>
-      <div className="flex-1" />
-      <div className="flex items-center gap-1">
-        <button className="relative p-2 rounded-md hover:bg-surface-hover text-fg-secondary">
-          <Settings size={18} />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-notification border-2 border-surface" />
-        </button>
-        <NotificationMenu />
-        <button className="p-2 rounded-md hover:bg-surface-hover text-fg-secondary">
-          <HelpCircle size={18} />
-        </button>
-        <AvatarMenu />
-      </div>
-    </ChromeHeader>
-  )
-}
-
 // ── Chip ──
 function Chip({ label, color }: { label: string; color: 'green' | 'orange' | 'gray' }) {
   const cls = {
