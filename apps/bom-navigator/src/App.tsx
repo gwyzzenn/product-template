@@ -1,4 +1,4 @@
-import { useState, type ReactElement } from 'react'
+import { useState, type ReactElement, type ElementType } from 'react'
 import type { ColumnDef } from '@tanstack/react-table'
 import {
   AppShell,
@@ -1280,6 +1280,17 @@ function ConfiguratorPage({
   )
 }
 
+// ── Placeholder Page ──
+function PlaceholderPage({ title, icon: Icon }: { title: string; icon: ElementType }) {
+  return (
+    <div className="flex flex-col items-center justify-center h-full gap-4 text-fg-tertiary">
+      <Icon size={40} strokeWidth={1.2} />
+      <span className="text-body-lg font-medium">{title}</span>
+      <span className="text-body text-fg-secondary">This page is coming soon.</span>
+    </div>
+  )
+}
+
 // ── Root ──
 function getAsideTitle(c: AsideContent | null): string {
   if (!c) return '詳情'
@@ -1291,22 +1302,72 @@ function getAsideTitle(c: AsideContent | null): string {
   return '詳情'
 }
 
+function MainContent({
+  activeId,
+  onNavigate,
+  openAside,
+  closeAside,
+}: {
+  activeId: string
+  onNavigate: (id: string) => void
+  openAside: (c: AsideContent) => void
+  closeAside: () => void
+}) {
+  switch (activeId) {
+    case 'configurator':
+      return (
+        <ConfiguratorPage
+          onBatchEntry={() => onNavigate('batch-entry')}
+          onSelectRule={(r) => r ? openAside({ type: 'rule', record: r }) : closeAside()}
+          onSelectPart={(r) => r ? openAside({ type: 'part', record: r }) : closeAside()}
+          onSelectAnalysis={(r) => r ? openAside({ type: 'analysis', record: r }) : closeAside()}
+          onSelectTrace={(r) => r ? openAside({ type: 'trace', record: r }) : closeAside()}
+        />
+      )
+    case 'batch-entry':
+      return (
+        <BatchEntryPage
+          onBack={() => onNavigate('configurator')}
+          onSelect={(r) => r ? openAside({ type: 'batch', record: r }) : closeAside()}
+        />
+      )
+    case 'fleet-registry':
+      return <PlaceholderPage title="Fleet Registry" icon={Server} />
+    case 'assembly-viewer':
+      return <PlaceholderPage title="Assembly Viewer" icon={List} />
+    case 'substitutes':
+      return <PlaceholderPage title="Substitutes" icon={Shuffle} />
+    case 'owner-config':
+      return <PlaceholderPage title="B-18351 Fleet Config" icon={FileText} />
+    case 'type-cert':
+      return <PlaceholderPage title="A321-200 Type Certificate" icon={FileText} />
+    case 'engine-config':
+      return <PlaceholderPage title="CFM56-5B Engine Config" icon={FileText} />
+    default:
+      return <PlaceholderPage title="Page Not Found" icon={FileText} />
+  }
+}
+
 export default function App() {
   const [activeId, setActiveId] = useState<string>('configurator')
-  const [showBatchEntry, setShowBatchEntry] = useState(false)
   const [asideOpen, setAsideOpen] = useState(false)
   const [asideContent, setAsideContent] = useState<AsideContent | null>(null)
 
   const closeAside = () => { setAsideContent(null); setAsideOpen(false) }
   const openAside = (c: AsideContent) => { setAsideContent(c); setAsideOpen(true) }
 
+  const handleNavigate = (id: string) => {
+    setActiveId(id)
+    closeAside()
+  }
+
   return (
     <TooltipProvider delayDuration={500} skipDelayDuration={300}>
-      <SidebarProvider activeId={activeId} onActiveChange={setActiveId}>
+      <SidebarProvider activeId={activeId} onActiveChange={handleNavigate}>
         <AppShell
           layout="primary-header"
           globalHeader={<GlobalHeader />}
-          sidebar={<AppSidebar activeId={activeId} onActiveChange={setActiveId} viewportInsetTop="var(--chrome-header-height)" />}
+          sidebar={<AppSidebar activeId={activeId} onActiveChange={handleNavigate} viewportInsetTop="var(--chrome-header-height)" />}
           aside={
             <AppShellAside title={getAsideTitle(asideContent)} width={380}>
               {asideContent?.type === 'rule'     && <RuleDetailPanel     selected={asideContent.record} onClose={closeAside} />}
@@ -1319,18 +1380,12 @@ export default function App() {
           asideOpen={asideOpen}
           onAsideOpenChange={(open) => { setAsideOpen(open); if (!open) setAsideContent(null) }}
         >
-          {showBatchEntry
-            ? <BatchEntryPage
-                onBack={() => setShowBatchEntry(false)}
-                onSelect={(r) => r ? openAside({ type: 'batch', record: r }) : closeAside()}
-              />
-            : <ConfiguratorPage
-                onBatchEntry={() => setShowBatchEntry(true)}
-                onSelectRule={(r) => r ? openAside({ type: 'rule', record: r }) : closeAside()}
-                onSelectPart={(r) => r ? openAside({ type: 'part', record: r }) : closeAside()}
-                onSelectAnalysis={(r) => r ? openAside({ type: 'analysis', record: r }) : closeAside()}
-                onSelectTrace={(r) => r ? openAside({ type: 'trace', record: r }) : closeAside()}
-              />}
+          <MainContent
+            activeId={activeId}
+            onNavigate={handleNavigate}
+            openAside={openAside}
+            closeAside={closeAside}
+          />
         </AppShell>
       </SidebarProvider>
       <Toaster />
