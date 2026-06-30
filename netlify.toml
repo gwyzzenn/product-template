@@ -10,7 +10,10 @@
 # CI 只有 audit.yml(tsc + lint:imports + build)+ sync-design-system.yml(Dependabot/DS 版本同步)。
 
 [build]
-  command = "npm run build-storybook:bom-navigator"
+  # build 全部 app → 單一 Storybook 網站,每個 app 各自是 sidebar 的獨立 section
+  # (Apps/bom-navigator、Apps/reactflow-demo、Apps/template…),點左側切換一次看一個。
+  # storySort(.storybook/preview.tsx)讓 landing 落在 Apps/reactflow-demo/Concept Map。
+  command = "npm run build-storybook"
   publish = "storybook-static"
 
 [build.environment]

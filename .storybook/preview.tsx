@@ -9,7 +9,9 @@ import type { Preview } from '@storybook/react'
 // 2026-05-29 fix landing:published template 只有 Apps stories。Base storySort 以 "Design System" 起頭、
 // 無 "Apps" 條目 → Apps stories 退化成字母序 → "All DS Components (Portal)" 排前 → Storybook 落在
 // 技術性的 "316 export import smoke" story(user 抓「打開一片空白/技術頁」)。
-// Override:Apps/template 內 "AppShell Dashboard"(真實產品 demo)排第一 = landing first story。
+// Override:landing 排序 — reactflow-demo 的 "Concept Map" 排第一(本 deploy build 的主角),
+// 其次 template 的 "AppShell Dashboard"。確保只 build reactflow-demo 時也直接落在 concept map,
+// 不會 alphabetical 落到 "All DS Components" 等技術 story。
 const preview: Preview = {
   ...basePreview,
   parameters: {
@@ -17,7 +19,7 @@ const preview: Preview = {
     options: {
       ...basePreview.parameters?.options,
       storySort: {
-        order: ['Apps', ['template', ['AppShell Dashboard', '*']]],
+        order: ['Apps', ['reactflow-demo', ['Concept Map', '*'], 'template', ['AppShell Dashboard', '*']]],
       },
     },
   },
