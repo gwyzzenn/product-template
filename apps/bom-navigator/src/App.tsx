@@ -862,7 +862,7 @@ function RuleSettingsTab({ onSelect }: { onSelect: (r: RuleRecord | null) => voi
             getRowId={(r) => r.id}
             selectable
             selection={checkedIds}
-            onSelectionChange={setCheckedIds}
+            onSelectionChange={(next) => setCheckedIds(next.mode === 'include' ? next.ids : [])}
             rowActions={(row) => (
               <Button
                 iconOnly
@@ -1112,7 +1112,7 @@ function BatchEntryPage({ onBack, onSelect }: { onBack: () => void; onSelect: (r
               getRowId={(r) => r.id}
               selectable
               selection={selectedIds}
-              onSelectionChange={setSelectedIds}
+              onSelectionChange={(next) => setSelectedIds(next.mode === 'include' ? next.ids : [])}
               rowActions={(row) => (
                 <Button iconOnly startIcon={Info} size="sm" variant="text" aria-label="View details" onClick={() => onSelect(row)} />
               )}

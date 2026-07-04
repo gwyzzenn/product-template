@@ -26,6 +26,9 @@ jobs:
       - name: Lint DS internal imports(防 consumer 用 internal path)
         run: npm run lint:imports
 
+      - name: Unit / behavior tests(Vitest)
+        run: npm test
+
       - name: Build all apps
         run: npm run build
 

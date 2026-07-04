@@ -11,6 +11,8 @@
     "dev": "echo 'Pick an app: cd apps/<name> && npm run dev' && exit 1",
     "build": "npm run build --workspaces --if-present",
     "typecheck": "tsc -b",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build --output-dir storybook-static",
     "build-storybook:bom-navigator": "STORYBOOK_APP=bom-navigator storybook build --output-dir storybook-static",
@@ -33,14 +35,18 @@
     "@storybook/react": "^8.6.0",
     "@storybook/react-vite": "^8.6.0",
     "@tailwindcss/vite": "^4.0.0",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.2",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^5.0.0",
+    "jsdom": "^29.1.1",
     "playwright": "^1.60.0",
     "storybook": "^8.6.0",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.0",
-    "vite": "^7.0.0"
+    "vite": "^7.0.0",
+    "vitest": "^4.1.9"
   },
   "engines": {
     "node": ">=22.0.0",
