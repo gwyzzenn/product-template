@@ -25,7 +25,10 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
             category: 'Topic',
             color: 'blue',
             children: [
-              { id: 'react', label: 'React', description: 'Component model、hooks、RSC。', category: 'Concept', color: 'blue' },
+              { id: 'react', label: 'React', description: 'Component model、hooks、RSC。', category: 'Concept', color: 'blue', alternatives: [
+                { code: 'PREACT-10', name: 'Preact（3kB 相容替代）' },
+                { code: 'SOLID-JS', name: 'SolidJS（fine-grained reactivity）' },
+              ] },
               { id: 'vue', label: 'Vue', description: 'Reactivity system、SFC。', category: 'Concept', color: 'blue' },
             ],
           },
@@ -67,7 +70,10 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
             category: 'Topic',
             color: 'turquoise',
             children: [
-              { id: 'postgres', label: 'PostgreSQL', description: '關聯式、ACID、SQL。', category: 'Concept', color: 'turquoise' },
+              { id: 'postgres', label: 'PostgreSQL', description: '關聯式、ACID、SQL。', category: 'Concept', color: 'turquoise', alternatives: [
+                { code: 'MYSQL-8', name: 'MySQL 8（關聯式替代）' },
+                { code: 'COCKROACH', name: 'CockroachDB（分散式 Postgres 相容）' },
+              ] },
               { id: 'redis', label: 'Redis', description: '記憶體快取、key-value。', category: 'Concept', color: 'turquoise' },
             ],
           },

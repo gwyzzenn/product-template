@@ -1,5 +1,5 @@
 import { Button, Field, FieldLabel, Input, Select, Separator, Tag, Textarea } from '@qijenchen/design-system'
-import { Trash2 } from 'lucide-react'
+import { ArrowLeftRight, Trash2 } from 'lucide-react'
 import { useConceptMap } from './ConceptMapContext'
 import type { TagColor } from './types'
 
@@ -77,6 +77,36 @@ export function NodeDetailAside() {
             onChange={(value) => updateConcept(id, { color: value as TagColor })}
           />
         </Field>
+
+        <Separator />
+
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <ArrowLeftRight size={15} className="text-fg-muted" />
+            <span className="text-body font-medium text-foreground">Alternative material</span>
+            <span className="text-caption text-fg-muted">
+              {data.alternatives?.length ?? 0}
+            </span>
+          </div>
+
+          {data.alternatives && data.alternatives.length > 0 ? (
+            <ul className="flex flex-col gap-1.5">
+              {data.alternatives.map((alt) => (
+                <li
+                  key={alt.code}
+                  className="flex items-baseline gap-2 rounded-lg bg-muted px-3 py-2"
+                >
+                  <span className="shrink-0 font-mono text-caption font-semibold text-foreground">
+                    {alt.code}
+                  </span>
+                  <span className="min-w-0 text-caption text-fg-secondary">{alt.name}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-caption text-fg-muted">此物料無替代料。</p>
+          )}
+        </div>
 
         <Separator />
 

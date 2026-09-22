@@ -93,6 +93,7 @@ export function seedToGraph(roots: ConceptSeed[]): { nodes: ConceptNodeType[]; e
         description: seed.description,
         category: seed.category,
         color: seed.color,
+        alternatives: seed.alternatives,
         hasChildren: false,
         collapsed: false,
         childCount: 0,
